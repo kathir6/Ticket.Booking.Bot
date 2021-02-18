@@ -47,33 +47,18 @@ int main(int argc, char *argv[])
     int bytesRead, bytesWritten = 0;
     struct timeval start1, end1;
     gettimeofday(&start1, NULL);
-    while(1)
     {
-        cout << ">";
-        string data;
-        getline(cin, data);
-        memset(&msg, 0, sizeof(msg));//clear the buffer
-        strcpy(msg, data.c_str());
-        if(data == "exit")
-        {
-            send(clientSd, (char*)&msg, strlen(msg), 0);
-            break;
-        }
+        strcpy(msg, "ping message");
         bytesWritten += send(clientSd, (char*)&msg, strlen(msg), 0);
-        cout << "2nd message\n > ";
-        getline(cin, data);
-        memset(&msg, 0, sizeof(msg));//clear the buffer
-        strcpy(msg, data.c_str());
-        bytesWritten += send(clientSd, (char*)&msg, strlen(msg), 0);
-        cout << "\nAwaiting server response..." << endl;
+
+        //cout << "\nAwaiting server response..." << endl;
         memset(&msg, 0, sizeof(msg));//clear the buffer
         bytesRead += recv(clientSd, (char*)&msg, sizeof(msg), 0);
         if(!strcmp(msg, "exit"))
         {
             cout << "Server has quit the session" << endl;
-            break;
         }
-        cout << "Server: " << msg << endl;
+        cout<< msg << endl;
     }
     gettimeofday(&end1, NULL);
     close(clientSd);
