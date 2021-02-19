@@ -1,176 +1,144 @@
-#include <iostream>
-#include <string>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <string.h>
-#include <netdb.h>
-#include <sys/uio.h>
-#include <sys/time.h>
-#include <sys/wait.h>
 #include <fcntl.h>
 #include <fstream>
+#include <iostream>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <string.h>
+#include <string>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 using namespace std;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-sockaddr_in servAddr, new_serverAddr;
+void *task1(void *);
 
-int create_socket(int port_fun)
+struct arg
 {
-    //setup a socket and connection tools
-                                      
-    bzero((char*)&servAddr, sizeof(servAddr));
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servAddr.sin_port = htons(port_fun);
+    int connFD;
+};
 
-    //open stream oriented socket with internet address
-    //also keep track of the socket descriptor
-    return socket(AF_INET, SOCK_STREAM, 0);
-}
-
-int bind_socket(int serverFD)
+int main(int argc, char *argv[]) 
 {
-    //bind the socket to its local address
-    return bind(serverFD, (struct sockaddr*) &servAddr, sizeof(servAddr));
-    
-}
+    int serverFD, portNo, bindS, connFD;
+    struct sockaddr_in ServerAddr, ClientAddr;
 
-int listen_IP(int serverFD)
-{
-    //listen for up to 5 requests at a time
-    return listen(serverFD, 5);
-}
+    pthread_t thread[10];
 
-int request_accept(int serverFD)
-{
-    //accept, create a new socket descriptor to 
-    //handle the new connection with client
-   // return accept(serverFD, (sockaddr *)&new_serverAddr, (socklen_t *) sizeof(new_serverAddr));
-    return accept(serverFD, (sockaddr *)NULL, NULL);
-}
-
-int send_Welcome_msg(int sFD)
-{
-    char msg[1000];
-    recv(sFD, (char*)&msg, sizeof(msg), 0);
-    strcpy(msg, "\nWelcome to xxx movie ticket booking\nPlease choose a option\n   1. Show Movie List\n   2. Show theatre List\n");
-    return send(sFD, (char *)&msg, strlen(msg), 0);
-}
-
-int main(int argc, char *argv[])
-{
-    //for the server, we only need to specify a port number
-    if(argc != 2)
+    if (argc != 2) 
     {
-        cout << "Mention the port number\n";
-        exit(0);
-    }
-    
-    //grab the port number
-    /*convert port number string (argv[1]) to integer (port)*/
-    int port = atoi(argv[1]);   
-    
-    int serverFD = create_socket(port);
-    if(serverFD == -1)
-    {
-        cout << "Error establishing the server socket" << endl;
-        exit(0);
-    }
-    else
-    {
-        cout << "socket created successfully\n";
-    }
-    
-    int bindStatus = bind_socket(serverFD);
-    if(bindStatus == -1)
-    {
-        cout << "Error binding socket to local address" << endl;
-        exit(0);
-    }
-    else 
-    {
-        cout << "socket get binded to the IP\n";
-    }
-    
-    int listenS = listen_IP(serverFD);
-    if( listenS == 0)
-    {
-        cout << "server is listening . . . \n";
-    }
-    else if (listenS == -1)
-    {
-        cout << "Error in listening\n";
-        exit(0);
+        cout << "Mention port number\nRecommded : ./server <port>\n";
+        return 0;
     }
 
-    int new_serverFD = request_accept(serverFD);
-    if(new_serverFD == -1)
-    {
-        cout << "Error accepting request from client! --- " << strerror(errno) << endl;
-        exit(0);
-    }
-    else
-    {
-        cout << "Connected with client :))) " << endl;
+    /*convert port to integer from string*/
+    portNo = atoi(argv[1]);
+
+    if ((portNo > 65535) || (portNo < 2000)) {
+        cerr << "Please enter a port number between 2000 - 65535" << endl;
+        return 0;
     }
 
-    if(send_Welcome_msg(new_serverFD) == -1)
+    /*create a socket*/
+    serverFD = socket(AF_INET, SOCK_STREAM, 0);
+    if (serverFD < 0) 
     {
-        cout << "Welcome Message Failed --- " << strerror(errno) << endl;
-        exit(0);
+        cerr << "Cannot open socket" << endl;
+        return 0;
     }
-    else
+
+    /*set ServerAddr*/
+    bzero((char *)&ServerAddr, sizeof(ServerAddr));
+    ServerAddr.sin_family = AF_INET;
+    ServerAddr.sin_addr.s_addr = INADDR_ANY;
+    ServerAddr.sin_port = htons(portNo);
+
+    /*bind socket to local IP address*/
+    bindS = bind(serverFD, (struct sockaddr *)&ServerAddr, sizeof(ServerAddr));
+    if (bindS < 0) 
     {
-        cout << "Welcome message sent\n";
+        cerr << "Cannot bind" << endl;
+        return 0;
     }
-/*
-    while(1)
+
+    listen(serverFD, 5);
+
+    int noThread = 0;
+
+    while (noThread < 3) 
     {
-        //receive a message from the client (listen)
-        cout << "Awaiting client response..." << endl;
-        memset(&msg, 0, sizeof(msg));//clear the buffer
-        bytesRead += recv(newSd, (char*)&msg, sizeof(msg), 0);
-        if(!strcmp(msg, "exit"))
-        {
-            cout << "Client has quit the session" << endl;
-            break;
+        socklen_t len = sizeof(ClientAddr);
+
+        cout << "Listening" << endl;
+
+        // this is where client connects. svr will hang in this mode until client
+        // conn
+        connFD = accept(serverFD, (struct sockaddr *)&ClientAddr, &len);
+
+        if (connFD < 0) {
+        cerr << "Cannot accept connection" << endl;
+        return 0;
+        } else {
+        cout << "Connection successful" << endl;
         }
-        cout << "Client: " << msg << endl;
-        cout << ">";
-        string data;
-        //data = "mes from server";
-        //strcpy(data.c_str(), "message from client");
-        getline(cin, data);
-        memset(&msg, 0, sizeof(msg)); //clear the buffer
-        strcpy(msg, data.c_str());
-        if(data == "exit")
-        {
-            //send to the client that server has closed the connection
-            send(newSd, (char*)&msg, strlen(msg), 0);
-            break;
-        }
-        
+        struct arg args_in;
+        args_in.connFD = connFD;
+        pthread_create(&thread[noThread], NULL, &task1, (void *)&args_in);
+
+        noThread++;
     }
-   */
-    int closeS1 = close(new_serverFD);
-    if(closeS1 == 0)
+
+    for (int i = 0; i < 3; i++) 
     {
-        if(close(serverFD) == 0)
+        pthread_join(thread[i], NULL);
+    }
+}
+
+void *task1(void *arg_thread) 
+{
+    pthread_mutex_lock(&lock);
+    struct arg *args_thread = (struct arg *)arg_thread;
+    int connFD = args_thread->connFD;
+    
+    cout << "new connection\n";
+    char test[256];
+    bzero(test, 256);
+    recv(connFD, (char*)&test, sizeof(test), 0);
+    while (1) 
+    {
+        char sendmsg[100] = "message from Server";
+        bzero(sendmsg, 100);
+        strcpy(sendmsg, "msg a");
+        cout << "enter msg to client : ";
+        cin >> sendmsg;
+        int sendS;
+        sendS = send(connFD, (char *)&sendmsg, sizeof(sendmsg), 0);
+        if(sendS == -1)
         {
-            cout << "Connection closed..." << endl;
+            cout << "error in msg sent : " << strerror(errno) << "\n";
         }
         else
         {
-            cout << "Connection not closed\n";
+            cout << "message sent success\n";
         }
+        bzero(test, 256);
+        recv(connFD, (char*)&test, sizeof(test), 0);
+        if(strcmp(test,"bye") == 0)
+        {
+            close(connFD);
+            break;
+        }
+        printf("Here is the message: %s\n", test);
+        
     }
-    else
-    {
-        cout << "Connection not closed\n";
-    }
-    return 0;   
+    cout << "\nClosing thread and conn" << endl;
+    pthread_mutex_unlock(&lock);
+    cout << "thread unlocked\n";
 }
