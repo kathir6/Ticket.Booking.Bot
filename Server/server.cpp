@@ -31,8 +31,6 @@ int main(int argc, char *argv[])
     int serverFD, portNo, bindS, listenS, connFD;
     struct sockaddr_in ServerAddr, ClientAddr;
 
-    //pthread_t thread[10];
-
     if (argc != 2) 
     {
         cout << "      Mention port number\n      Recommended : ./server <port>\n";
@@ -118,12 +116,14 @@ void *server_client(void *arg_thread)
     struct arg *args_thread = (struct arg *)arg_thread;
     int connFD = args_thread->connFD, sendS, recvS;
     char recv_msg[1500], send_msg[1500];
+    vector <string> movie_vect;
+
     bzero(recv_msg, strlen(recv_msg));
     recv(connFD, (char*)&recv_msg, sizeof(recv_msg), 0);
-    while (1) 
+    //while (1) 
     {
         bzero(send_msg, strlen(send_msg));
-        strcpy(send_msg, "msg from server");
+        strcpy(send_msg, "Welcome to xxx ticket booking system\nHow can I help you???\n");
         sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
         if(sendS == -1)
         {
@@ -133,14 +133,16 @@ void *server_client(void *arg_thread)
         {
             cout << "      to client     : success\n";
         }
-        bzero(recv_msg, 256);
+
+        bzero(recv_msg, strlen(recv_msg));
         recvS = recv(connFD, (char*)&recv_msg, sizeof(recv_msg), 0);
         if(strcmp(recv_msg,"bye") == 0)
         {
             if(close(connFD) == 0)
             {
                 cout << "\n      stops with    : " << connFD << "\n\n";
-                break;
+                goto connect_end;
+                //break;
             }
             else
             {
@@ -148,6 +150,17 @@ void *server_client(void *arg_thread)
             }
         }
         cout << "      from client   : " << recv_msg << "\n";
+        /*check for string content*/
+        movie_vect.push_back("Chakra");
+        movie_vect.push_back("Uppena");
+
+        for(int i=0; i< movie_vect.size() ; ++i)
+        {
+            //for()
+        }
+
         
     }
+    connect_end:
+    int dummy;
 }
