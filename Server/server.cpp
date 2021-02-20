@@ -19,7 +19,7 @@
 using namespace std;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 vector <pthread_t> thread_vect;
-void *task1(void *);
+void *server_client(void *);
 
 struct arg
 {
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
     if (argc != 2) 
     {
-        cout << "Mention port number\nRecommended : ./server <port>\n";
+        cout << "      Mention port number\n      Recommended : ./server <port>\n";
         return 0;
     }
 
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     portNo = atoi(argv[1]);
     /*Check with range for the port number*/
     if ((portNo > 65535) || (portNo < 2000)) {
-        cerr << "Please enter a port number between 2000 - 65535" << endl;
+        cerr << "      Please enter a port number between 2000 - 65535" << endl;
         return 0;
     }
 
@@ -51,12 +51,12 @@ int main(int argc, char *argv[])
     serverFD = socket(AF_INET, SOCK_STREAM, 0);
     if (serverFD == -1) 
     {
-        cerr << "Cannot open socket : " << strerror(errno) << endl;
+        cerr << "      socket        : failed  --- " << strerror(errno) << endl;
         return 0;
     }
     else
     {
-        cout << "socket gets created\n";
+        cout << "      socket        : success\n";
     }
 
     /*set ServerAddr*/
@@ -69,92 +69,85 @@ int main(int argc, char *argv[])
     bindS = bind(serverFD, (struct sockaddr *)&ServerAddr, sizeof(ServerAddr));
     if (bindS == -1) 
     {
-        cerr << "Cannot bind : " << strerror(errno) << endl;
+        cerr << "      bind          : failed  --- " << strerror(errno) << endl;
         return 0;
     }
     else if(bindS == 0)
     {
-        cout << "bind success\n";
+        cout << "      bind          : success\n";
     }
 
     listenS = listen(serverFD, 5);
     if(listenS == 0)
     {
-        cout << "server starts to listen . . .\n";
+        cout << "      listen        : success\n";
     }
     else if(listenS == -1)
     {
-        cout << "error in listening : " << strerror(errno) << "\n";
+        cout << "      listen        : failed  --- " << strerror(errno) << "\n";
     }
+
+    socklen_t len = sizeof(ClientAddr);
 
     while(1) 
     {
-        socklen_t len = sizeof(ClientAddr);
-
-        // this is where client connects. svr will hang in this mode until client
+        cout << "\n\n- - - waiting for client to connect - - -\n\n";
         connFD = accept(serverFD, (struct sockaddr *)&ClientAddr, &len);
         thread_vect.push_back(0);
 
         if (connFD < 0) 
         {
-            cerr << "Cannot accept connection" << endl;
+            cerr << "      connection    : failed  --- " << endl;
             return 0;
         } 
         else 
         {
-            cout << "Connection successful" << endl;
+            cout << "      connection    : success" << endl;
+            cout << "      start with    : " << connFD << "\n\n";
         }
         struct arg args_in;
         args_in.connFD = connFD;
-        pthread_create(&thread_vect[thread_vect.size()], NULL, &task1, (void *)&args_in);
+        pthread_create(&thread_vect[thread_vect.size()], NULL, &server_client, (void *)&args_in);
+        pthread_join(thread_vect[thread_vect.size()], NULL);
     }
-    /*
-    while(1) 
-    {
-        pthread_join(thread[i], NULL);
-    }
-    */
    return 0;
 }
 
-void *task1(void *arg_thread) 
+void *server_client(void *arg_thread) 
 {
-    pthread_mutex_lock(&lock);
     struct arg *args_thread = (struct arg *)arg_thread;
-    int connFD = args_thread->connFD;
-    
-    cout << "new connection\n";
-    char test[256];
-    bzero(test, 256);
-    recv(connFD, (char*)&test, sizeof(test), 0);
+    int connFD = args_thread->connFD, sendS, recvS;
+    char recv_msg[1500], send_msg[1500];
+    bzero(recv_msg, strlen(recv_msg));
+    recv(connFD, (char*)&recv_msg, sizeof(recv_msg), 0);
     while (1) 
     {
-        char sendmsg[100] = "message from Server";
-        bzero(sendmsg, 100);
-        strcpy(sendmsg, "msg a");
-        cout << "enter msg to client : ";
-        cin >> sendmsg;
-        int sendS;
-        sendS = send(connFD, (char *)&sendmsg, sizeof(sendmsg), 0);
+        bzero(send_msg, strlen(send_msg));
+        strcpy(send_msg, "msg from server");
+        sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
         if(sendS == -1)
         {
-            cout << "error in msg sent : " << strerror(errno) << "\n";
+            cout << "      to client     : failed   --- " << strerror(errno) << "\n";
         }
         else
         {
-            cout << "message sent success\n";
+            cout << "      to client     : success\n";
         }
-        bzero(test, 256);
-        recv(connFD, (char*)&test, sizeof(test), 0);
-        if(strcmp(test,"bye") == 0)
+        bzero(recv_msg, 256);
+        recvS = recv(connFD, (char*)&recv_msg, sizeof(recv_msg), 0);
+        if(strcmp(recv_msg,"bye") == 0)
         {
-            close(connFD);
-            break;
+            if(close(connFD) == 0)
+            {
+                cout << "\n      stops with    : " << connFD << "\n\n";
+                break;
+            }
+            else
+            {
+                cout << "      close         : failed\n";
+            }
         }
-        printf("Here is the message: %s\n", test);
+        cout << "      from client   : " << recv_msg << "\n";
         
     }
-    cout << "\nClosing thread and conn" << endl;
-    pthread_mutex_unlock(&lock);
-    cout << "thread unlocked\n";
 }
