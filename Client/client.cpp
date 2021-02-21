@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         cerr << "Usage: ip_address port" << endl; exit(0); 
     }
     char *serverIp = argv[1]; 
-    int port = atoi(argv[2]), closeS; 
+    int port = atoi(argv[2]), closeS, recvS, sendS; 
     char send_msg[1500], recv_msg[1500];
     struct hostent* host = gethostbyname(serverIp); 
     sockaddr_in sendSockAddr;   
@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     if( connectS == -1)
     {
         cout<<"      connection    : failed\n";
+        exit(0);
     }
     else if( connectS == 0)
     {
@@ -49,14 +50,20 @@ int main(int argc, char *argv[])
         {
             goto exit_connect;
         }
-
         bzero(recv_msg, strlen(recv_msg));
-        recv(clientFD, (char*)&recv_msg, sizeof(recv_msg), 0);
-        cout << recv_msg << endl;
-
-        cout << " --> ";
+        recvS = recv(clientFD, (char*)&recv_msg, sizeof(recv_msg), 0);
+        if(recvS == -1)
+        {
+            cout << "        recv        : failed\n";
+            exit(0);
+        }
+        else
+        {
+            cout << recv_msg << "\n";
+        }
+        cout << "                    --> ";
         bzero(send_msg, strlen(send_msg));
-        scanf("%[^\n]s", send_msg);
+        cin.getline(send_msg, 1000);
     }
     exit_connect:
     closeS = close(clientFD);
@@ -67,6 +74,7 @@ int main(int argc, char *argv[])
     else
     {
         cout << "      close         : failed\n";
+        exit(0);
     }
     return 0;    
 }

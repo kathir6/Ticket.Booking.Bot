@@ -1,30 +1,7 @@
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <fstream>
-#include <iostream>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <string.h>
-#include <string>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <vector>
+#include "server_client.h"
 
-using namespace std;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 vector <pthread_t> thread_vect;
-void *server_client(void *);
-
-struct arg
-{
-    int connFD;
-};
 
 int main(int argc, char *argv[]) 
 {
@@ -111,56 +88,3 @@ int main(int argc, char *argv[])
    return 0;
 }
 
-void *server_client(void *arg_thread) 
-{
-    struct arg *args_thread = (struct arg *)arg_thread;
-    int connFD = args_thread->connFD, sendS, recvS;
-    char recv_msg[1500], send_msg[1500];
-    vector <string> movie_vect;
-
-    bzero(recv_msg, strlen(recv_msg));
-    recv(connFD, (char*)&recv_msg, sizeof(recv_msg), 0);
-    //while (1) 
-    {
-        bzero(send_msg, strlen(send_msg));
-        strcpy(send_msg, "Welcome to xxx ticket booking system\nHow can I help you???\n");
-        sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
-        if(sendS == -1)
-        {
-            cout << "      to client     : failed   --- " << strerror(errno) << "\n";
-        }
-        else
-        {
-            cout << "      to client     : success\n";
-        }
-
-        bzero(recv_msg, strlen(recv_msg));
-        recvS = recv(connFD, (char*)&recv_msg, sizeof(recv_msg), 0);
-        if(strcmp(recv_msg,"bye") == 0)
-        {
-            if(close(connFD) == 0)
-            {
-                cout << "\n      stops with    : " << connFD << "\n\n";
-                goto connect_end;
-                //break;
-            }
-            else
-            {
-                cout << "      close         : failed\n";
-            }
-        }
-        cout << "      from client   : " << recv_msg << "\n";
-        /*check for string content*/
-        movie_vect.push_back("Chakra");
-        movie_vect.push_back("Uppena");
-
-        for(int i=0; i< movie_vect.size() ; ++i)
-        {
-            //for()
-        }
-
-        
-    }
-    connect_end:
-    int dummy;
-}
