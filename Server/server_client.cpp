@@ -5,7 +5,7 @@ void *server_client(void *arg_thread)
     struct arg *args_thread = (struct arg *)arg_thread;
     int connFD = args_thread->connFD, sendS, recvS, showslot, ticket_count, ticket_price;
     char recv_msg[1500], send_msg[1500], tp[100];
-    vector <string> movie_vect;
+    vector <string> movie_vect, day_vect, show_vect;
 
     bzero(recv_msg, strlen(recv_msg));
     recv(connFD, (char*)&recv_msg, sizeof(recv_msg), 0);
@@ -42,9 +42,16 @@ void *server_client(void *arg_thread)
         /*check for string content*/
         movie_vect.push_back("chakra");
         movie_vect.push_back("uppena");
+        day_vect.push_back("today");
+        day_vect.push_back("tomorrow");
+        show_vect.push_back("morning");
+        show_vect.push_back("noon");
+        show_vect.push_back("evening");
+        show_vect.push_back("night");
+
         char * words;
-        char mf[100];
-        int mf_flag = 0;
+        char mf[100], df[100], sf[100];
+        int mf_flag = 0, g_flag = 0, day_flag = 0, show_flag = 0;
         words = strtok(recv_msg, " ");
         while(words != NULL)
         {
@@ -54,10 +61,9 @@ void *server_client(void *arg_thread)
             }
             for(int i=0; i< movie_vect.size() ; ++i)
             {
-                
                 if(strcmp(words, (movie_vect[i]).c_str()) == 0)
                 {
-                    mf_flag = 1;
+                    g_flag = mf_flag = 1;
                     strcpy(mf, words);
                     cout << "      movie found   : success\n";
                     break;
