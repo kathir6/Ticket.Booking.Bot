@@ -17,7 +17,7 @@ server_client()
 {
 	send_welcome_note()
 	recv_request()
-	check_movie():
+	check_code:
 	search_for_movie_name()
 		set_general_flag
 		set_movie_found_flag
@@ -27,27 +27,27 @@ server_client()
 	search_for_show()
 		set_general_flag
 		set_show_found_flag
-	if(movie_found_flag)
+	if(movie_found_flag && !(day_found_flag) && !(time_found_flag))
 	{
 		send_movie_date_time()
 	}
-	else if(day_found_flag)
+	else if(day_found_flag && !(movie_found_flag) && !(time_found_flag))
 	{
 		send_movie_list_time()
 	}
-	else if(time_found_flag)
+	else if(time_found_flag && !(movie_found_flag) && !(day_found_flag))
 	{
 		send_movie_list_day()
 	}
-	else if(movie_found_flag && day_found_flag)
+	else if(movie_found_flag && day_found_flag && !(time_found_flag))
 	{
 		send_time()
 	}
-	else if(movie_found_flag && time_found_flag)
+	else if(movie_found_flag && time_found_flag && !(day_found_flag))
 	{
 		send_day()
 	}
-	else if(day_found_flag && time_found_flag)
+	else if(day_found_flag && time_found_flag && !(movie_found_flag))
 	{
 		send_movie_list()
 	}
@@ -55,15 +55,20 @@ server_client()
 	{
 		send_particular_show()
 	}
-	else if(no_general_flag_continue)
+	else if(no_general_flag)
 	{
-		send_again_request()
-		goto check_movie()
-	}
-	else if(no_general_flag_no_continue)
-	{
-		send_end_note()
-		close_connection()
+		send_continue
+		recv_yes_or_no
+		if(continue)
+		{
+			send_again_request
+			goto check_code;
+		}
+		else if(no_continue)
+		{
+			send_end_note()
+			close_connection()
+		}
 	}
 	recv_option()
 	send_ticket_count()
