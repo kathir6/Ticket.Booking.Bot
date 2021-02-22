@@ -27,17 +27,33 @@ server_client()
 	search_for_show()
 		set_general_flag
 		set_show_found_flag
-	if(movie_found)
+	if(movie_found_flag)
 	{
 		send_movie_date_time()
 	}
-	else if(day_found)
+	else if(day_found_flag)
 	{
 		send_movie_list_time()
 	}
-	else if(time_found)
+	else if(time_found_flag)
 	{
 		send_movie_list_day()
+	}
+	else if(movie_found_flag && day_found_flag)
+	{
+		send_time()
+	}
+	else if(movie_found_flag && time_found_flag)
+	{
+		send_day()
+	}
+	else if(day_found_flag && time_found_flag)
+	{
+		send_movie_list()
+	}
+	else if(movie_found_flag && day_found_flag && time_found_flag)
+	{
+		send_particular_show()
 	}
 	else if(no_general_flag_continue)
 	{
