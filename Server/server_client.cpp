@@ -213,12 +213,12 @@ void *server_client(void *arg_thread)
           if(strcmp(recv_msg, "y") == 0)
           {
             bzero(send_msg, strlen(send_msg));
-            strcpy(send_msg, "Thank You :)))\nYour Tickets have been booked\n\nThank You for contacting :)))\nPlease reach out the system for any help\n");
+            strcpy(send_msg, "Thank You :)))\nYour Tickets have been booked\n\nThank You for contacting :)))\nPlease reach out the system for any help\nTo close connection enter \"bye\"");
           }
           else if(strcmp(recv_msg, "n") == 0)
           {
             bzero(send_msg, strlen(send_msg));
-            strcpy(send_msg, "\n\nThank You for contacting :)))\nPlease reach out the system for any help\n");  
+            strcpy(send_msg, "\n\nThank You for contacting :)))\nPlease reach out the system for any help\nTo close connection enter \"bye\"");  
           }
         }
        

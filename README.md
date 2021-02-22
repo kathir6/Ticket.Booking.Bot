@@ -1,6 +1,6 @@
 # Ticket_Booking_Bot
 
-main()
+`main()`
 {
 	create_socket()
 	bind_socket()
@@ -13,7 +13,7 @@ main()
 	}
 }
 
-server_client()
+`server_client()`
 {
 	send_welcome_note()
 	check_code:
@@ -67,7 +67,7 @@ server_client()
 		else if(no_continue)
 		{
 			send_end_note()
-			close_connection()
+			`close()`
 		}
 	}
 	recv_option()
@@ -76,5 +76,5 @@ server_client()
 	send_ticket_price()
 	recv_confirmation()
 	send_end_note()
-	close_connection()
+	`close()`
 }
