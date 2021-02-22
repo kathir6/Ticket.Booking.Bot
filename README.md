@@ -16,8 +16,8 @@ main()
 server_client()
 {
 	send_welcome_note()
-	recv_request()
 	check_code:
+	recv_request()
 	search_for_movie_name()
 		set_general_flag
 		set_movie_found_flag
