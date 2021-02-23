@@ -29,6 +29,7 @@ void *server_client(void *arg_thread)
     /*list*/
     movie_vect.push_back("chakra");
     movie_vect.push_back("uppena");
+    movie_vect.push_back("master");
     day_vect.push_back("today");
     day_vect.push_back("tomorrow");
     show_vect.push_back("morning");
@@ -74,7 +75,7 @@ check_recv_msg_end:
         {
           day_flag = 1;
           strcpy(df, words);
-          cout << "        day found   : success\n";
+          cout << "      day found     : success\n";
           break;
         }
       }
