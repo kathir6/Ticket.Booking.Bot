@@ -3,39 +3,30 @@
 void *server_client(void *arg_thread) 
 {
   struct arg *args_thread = (struct arg *)arg_thread;
-  int connFD = args_thread->connFD, sendS, recvS, showslot, ticket_count,
-      ticket_price;
-  char recv_msg[1500], send_msg[1500], tp[100];
+  int connFD = args_thread->connFD, sendS, recvS, closeS, showslot, ticket_count,ticket_price, movie_flag = 0, day_flag = 0, show_flag = 0;
+  char recv_msg[1500], send_msg[1500], tp[100], mf[100], df[100], sf[100];
   vector<string> movie_vect, day_vect, show_vect;
-
+  char *words;
+  
+  /* recv_start_dummy_msg*/  
   bzero(recv_msg, strlen(recv_msg));
   recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
   // while (1)
   {
+    /* Welcome_Note */
     bzero(send_msg, strlen(send_msg));
-    strcpy(send_msg,
-           "Welcome to xxx ticket booking system\nHow can I help you???\n");
+    strcpy(send_msg, "Welcome to xxx ticket booking system\nHow can I help you???\n");
     sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
-    if (sendS == -1) {
-      cout << "      to client     : failed   --- " << strerror(errno) << "\n";
-    } else {
+    if (sendS == -1) 
+    {
+      cout << "      to client     : failed   --- " << strerror(errno) << "\n"; exit(0);
+    } 
+    else 
+    {
       cout << "      to client     : success\n";
     }
-  check_movie:
-    bzero(recv_msg, strlen(recv_msg));
-    recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
-    if (strcmp(recv_msg, "bye") == 0) {
-      if (close(connFD) == 0) {
-        cout << "\n      stops with    : " << connFD << "\n\n";
-        goto connect_end;
-        // break;
-      } else {
-        cout << "      close         : failed\n";
-      }
-    }
-    cout << "      from client   : " << recv_msg << "\n";
-    check_recv_msg_end:
-    /*check for string content*/
+
+    /*list*/
     movie_vect.push_back("chakra");
     movie_vect.push_back("uppena");
     day_vect.push_back("today");
@@ -45,15 +36,30 @@ void *server_client(void *arg_thread)
     show_vect.push_back("evening");
     show_vect.push_back("night");
 
-    char *words;
-    char mf[100], df[100], sf[100];
-    int movie_flag = 0, day_flag = 0, show_flag = 0;
+check_movie:
+    /* recv_request */
+    bzero(recv_msg, strlen(recv_msg));
+    recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
+    cout << "      from client   : " << recv_msg << "\n";
+    if (strcmp(recv_msg, "bye") == 0) 
+    {
+      goto connect_end;
+    }
+
+    /*check for string content*/
+    
+check_recv_msg_end:
+
     words = strtok(recv_msg, " ");
-    while (words != NULL) {
-      for (int i = 0; i < strlen(words); ++i) {
+    movie_flag = day_flag = show_flag = 0;
+    while (words != NULL) 
+    {
+      for (int i = 0; i < strlen(words); ++i) 
+      {
         words[i] = tolower(words[i]);
       }
-      for (int i = 0; i < movie_vect.size(); ++i) {
+      for (int i = 0; i < movie_vect.size(); ++i) 
+      {
         if (strcmp(words, (movie_vect[i]).c_str()) == 0) 
         {
           movie_flag = 1;
@@ -62,7 +68,28 @@ void *server_client(void *arg_thread)
           break;
         }
       }
-      if (movie_flag == 1) {
+      for(int i=0; i < day_vect.size(); ++i)
+      {
+        if (strcmp(words, (day_vect[i]).c_str()) == 0)
+        {
+          day_flag = 1;
+          strcpy(df, words);
+          cout << "        day found   : success\n";
+          break;
+        }
+      }
+      for(int i=0; i < show_vect.size(); ++i)
+      { 
+        if (strcmp(words, (show_vect[i]).c_str()) == 0)
+        {
+          show_flag = 1;
+          strcpy(sf, words);
+          cout << "       show found   : success\n";
+          break;
+        }
+      }
+      if (movie_flag && day_flag && show_flag) 
+      {
         break;
       }
       words = strtok(NULL, " ");
@@ -75,24 +102,47 @@ void *server_client(void *arg_thread)
       strcpy(send_msg, "Choose one timings from the list below\n");
       strcat(send_msg, "     Movie Name    - ");
       strcat(send_msg, mf);
-      strcat(send_msg, "\n       Timing       \n");
+      strcat(send_msg, "\n       Timing       \n                    ");
       strcat(send_msg, "                    ");
       strcat(send_msg, "       01              02              03              04        \n");
       strcat(send_msg, "       Today        ");
       strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        09:00 PM     \n");
       strcat(send_msg, "                    ");
       strcat(send_msg, "       05              06              07              08        \n");
-      strcat(send_msg, " Day after tomorrow ");
+      strcat(send_msg, "      Tomorrow      ");
       strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        09:00 PM    \n");
       strcat(send_msg, "\nPlease select a show timing by choosing a number near to it    \n");
     }
-    else if ((movie_flag) && (!day_flag) && (show_flag))
+    /* (!movie_found_flag) && (day_found_flag) && !(time_found_flag) */
+    else if ((!movie_flag) && (day_flag) && (!show_flag))
     {
-
+      strcpy(send_msg, "Choose one timings from the list below\n");
+      int show_slot = 01;
+      for(int j=0; j < movie_vect.size(); ++j)
+      {
+        strcat(send_msg, "     Movie Name    - ");
+        strcat(send_msg, (movie_vect[j]).c_str());
+        strcat(send_msg, "\n       Timing       \n                           ");
+        for(int k=0; k < 4; k++)
+        {
+          sprintf(tp, "%.2d", show_slot);
+          show_slot++;
+          strcat(send_msg, tp);
+          strcat(send_msg, "              ");
+        }
+        if(strcmp(df, "today") == 0)
+        {
+          strcat(send_msg, "\n       Today        ");
+        }
+        else if (strcmp(df, "tomorrow") == 0)
+        {
+          strcat(send_msg, "      Tomorrow      ");
+        }
+        strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        09:00 PM    \n");
+      }
     }
     else if ((!movie_flag) && (!day_flag) && (!show_flag))
     {
-      movie_flag = 0;
       strcpy(send_msg, "Sorry :((( Movie Not Found\nBelow are the movies currently available . . .\n");
       for(int i=0; i < movie_vect.size(); ++i)
       {
@@ -100,82 +150,123 @@ void *server_client(void *arg_thread)
         strcat(send_msg, (movie_vect[i]).c_str());
         strcat(send_msg, "\n");
       }
-      strcat(send_msg, "Do you want to continue???(yes/no)\n");
+      strcat(send_msg, "Do you want to continue? (yes/no)\n");
+      /* send continue request */
+      sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
+      if(sendS == -1)
+      {
+        cout << "      to client     : failed   --- " << strerror(errno) << "\n"; exit(0);
+      }
+      else 
+      {
+        cout << "      to client     : success\n";
+      }
+
+      /* recv_continue */
+      bzero(recv_msg, strlen(recv_msg));
+      recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
+      cout << "      from client   : " << recv_msg << "\n";
+      if(recvS == -1)
+      {
+        cout << "      from client   : failed\n"; exit(0);
+      }
+      else if (strcmp(recv_msg, "yes") == 0) 
+      {
+        strcpy(send_msg, "Please enter a movie name \n");
+
+        /* send_request */
+        sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
+        if(sendS == -1)
+        {
+          cout << "      to client     : failed   --- " << strerror(errno) << "\n"; exit(0);
+        }
+        else 
+        {
+          cout << "      to client     : success\n";
+        }
+        goto check_movie;
+      }
+      else if (strcmp(recv_msg, "no") == 0)
+      {
+        cout << "      from client   : " << recv_msg << "\n";
+        strcpy(send_msg, "Thank You for contacting :)))\nPlease reach out the system for any help\nEnter \"bye\"\n");
+        /* send_end_note */
+        sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
+        goto connect_end;
+        if(sendS == -1)
+        {
+          cout << "      to client     : failed   --- " << strerror(errno) << "\n"; exit(0);
+        }
+        else 
+        {
+          cout << "No Continue\n      to client     : success\n"; 
+        }
+      }
     }
 
     /* send option list */
     sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
-    if (sendS == -1) {
+    if (sendS == -1) 
+    {
       cout << "      to client     : failed   --- " << strerror(errno) << "\n";
-    } else {
+    } 
+    else 
+    {
       cout << "      to client     : success\n";
     }
 
     /* recv_option */
     bzero(recv_msg, strlen(recv_msg));
     recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
-    if (strcmp(recv_msg, "bye") == 0) {
-      if (close(connFD) == 0) {
-        cout << "\n      stops with    : " << connFD << "\n\n";
-        goto connect_end;
-        // break;
-      } else {
-        cout << "      close         : failed\n";
-      }
+    cout << "Option\n      from client   : " << recv_msg << "\n";
+    if (strcmp(recv_msg, "bye") == 0) 
+    {
+      goto connect_end;
     }
-    cout << "      from client   : " << recv_msg << "\n";
-
+    
     /* send_ticket_count */
     bzero(send_msg, strlen(send_msg));
-    if (movie_flag == 1) {
-      showslot = atoi(recv_msg);
-      strcpy(
-          send_msg,
-          "\nHow many tickets do you want???\nCount should be from 1 to 10\n");
-    } else if ((movie_flag == 0) && (strcmp(recv_msg, "yes") == 0)) {
-      strcpy(send_msg, "Please enter a movie name \n");
-    } else if ((movie_flag == 0) && (strcmp(recv_msg, "no") == 0)) {
-      strcpy(send_msg, "Thank You for contacting :)))\nPlease reach out the "
-                       "system for any help\n");
-    }
+    showslot = atoi(recv_msg);
+    strcpy(send_msg, "\nHow many tickets do you want?\nCount should be from 1 to 10\n");
+    
     sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
-    if (sendS == -1) {
+    if (sendS == -1) 
+    {
       cout << "      to client     : failed   --- " << strerror(errno) << "\n";
-    } else {
+    } 
+    else 
+    {
       cout << "      to client     : success\n";
-    }
-    if ((movie_flag == 0) && (strcmp(recv_msg, "yes") == 0)) {
-      goto check_movie;
     }
 
     /* recv_ticket_count */
-    ticket_count:
+ticket_count:
     bzero(recv_msg, strlen(recv_msg));
     recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
-
+    cout << "      from client   : " << recv_msg << "\n";
     /* send_ticket_price */
-    if (recvS == -1) {
-      cout << "      from client   : failed\n";
-    } else if (strcmp(recv_msg, "bye") == 0) {
-      if (close(connFD) == 0) {
-        cout << "\n      stops with    : " << connFD << "\n\n";
-        goto connect_end;
-        // break;
-      } else {
-        cout << "      close         : failed\n";
-      }
-    } else {
-      cout << "      from client   : " << recv_msg << "\n";
+    if (recvS == -1) 
+    {
+      cout << "      from client   : failed\n" << strerror(errno) << "\n"; exit(0);
+    } 
+    else if (strcmp(recv_msg, "bye") == 0) 
+    {
+      goto connect_end;
+    } 
+    else 
+    {
       bzero(send_msg, strlen(send_msg));
       ticket_count = atoi(recv_msg);
-      ticket_price = ticket_count * 140;
-      strcpy(send_msg, "Ticket Price : ");
-      sprintf(tp, "%d", ticket_price);
-      strcat(send_msg, tp);
-      strcat(send_msg, "\nPlease confirm to book tickets (y/n) . . . ");
-    }
-    if ((ticket_count < 1) || (ticket_count > 11)) 
-    {
+      if( (ticket_count > 0) && (ticket_count < 11) )
+      {
+        ticket_price = ticket_count * 140;
+        strcpy(send_msg, "Ticket Price : ");
+        sprintf(tp, "%d", ticket_price);
+        strcat(send_msg, tp);
+        strcat(send_msg, "\nPlease confirm to book tickets (yes/no) . . . ");
+      }
+      else
+      {
         bzero(send_msg, strlen(send_msg));
         strcpy(send_msg, "Ticket Count seems invalid\nPlease input again within the limit of 1 to 10. . .\n");
         sendS = send(connFD, (char *)&send_msg, strlen(send_msg), 0);
@@ -185,6 +276,7 @@ void *server_client(void *arg_thread)
         cout << "      to client     : success\n";
         }
         goto ticket_count;    
+      }
     }
 
     sendS = send(connFD, (char *)&send_msg, strlen(send_msg), 0);
@@ -197,6 +289,7 @@ void *server_client(void *arg_thread)
     /* recv_confirmation */
     bzero(recv_msg, strlen(recv_msg));
     recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
+    cout << "      from client   : " << recv_msg << "\n";
 
     /* send_end_note */
     if (recvS == -1) 
@@ -205,29 +298,19 @@ void *server_client(void *arg_thread)
     } 
     else if (strcmp(recv_msg, "bye") == 0) 
     {
-      if (close(connFD) == 0) 
-      {
-        cout << "\n      stops with    : " << connFD << "\n\n";
-        goto connect_end;
-        // break;
-      } 
-      else 
-      {
-        cout << "      close         : failed\n";
-      }
+      goto connect_end;
     } 
     else 
     {
-      cout << "      from client   : " << recv_msg << "\n";
-      if (strcmp(recv_msg, "y") == 0) 
+      if (strcmp(recv_msg, "yes") == 0) 
       {
         bzero(send_msg, strlen(send_msg));
         strcpy(send_msg,
-               "Thank You :)))\nYour Tickets have been booked\n\nThank You for "
+               "      Thank You :)))\n      Your Tickets have been booked\n\nThank You for "
                "contacting :)))\nPlease reach out the system for any help\nTo "
                "close connection enter \"bye\"");
       } 
-      else if (strcmp(recv_msg, "n") == 0) 
+      else if (strcmp(recv_msg, "no") == 0) 
       {
         bzero(send_msg, strlen(send_msg));
         strcpy(send_msg,
@@ -246,31 +329,34 @@ void *server_client(void *arg_thread)
     /* recv_bye */
     bzero(recv_msg, strlen(recv_msg));
     recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
+    cout << "      from client   : " << recv_msg << "\n";
     if (recvS == -1) 
     {
       cout << "      from client   : failed\n";
     } 
-    else if (strcmp(recv_msg, "bye") == 0) 
+    else
     {
-      cout << "      from client   : " << recv_msg << "\n";
-      if (close(connFD) == 0) 
+      if (strcmp(recv_msg, "bye") == 0) 
       {
-        cout << "\n      stops with    : " << connFD << "\n\n";
         goto connect_end;
-        // break;
       } 
-      else 
+      else if (strcmp(recv_msg, "bye") != 0)
       {
-        cout << "      close         : failed\n";
+        goto check_recv_msg_end;
       }
-    } 
-    else if (strcmp(recv_msg, "bye") != 0)
-    {
-      cout << "      from client   : " << recv_msg << "\n";
-      goto check_recv_msg_end;
     }
-  }
+  
 connect_end:
-  int dummy;
+  closeS = close(connFD);
+  if(closeS == 0)
+  {
+    cout << "\n      stops with    : " << connFD << "\n\n";
+  }
+  else
+  {
+    cout << "       close        : failed\n"; exit(0);
+  } 
+  
+  }
   return 0;
 }
