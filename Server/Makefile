@@ -4,6 +4,6 @@ SRC = *.cpp\
 
 build: ${SRC}
 		g++ ${SRC} ${INC} -o server -pthread
-		./server 8000
+		./server 8001
 		rm rf server
 

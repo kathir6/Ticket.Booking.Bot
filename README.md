@@ -19,14 +19,12 @@
 	check_code:
 	recv_request()
 	search_for_movie_name()
-		set_general_flag
 		set_movie_found_flag
 	search_for_day()
-		set_general_flag
 		set_day_found_flag
 	search_for_show()
-		set_general_flag
 		set_show_found_flag
+		
 	if(movie_found_flag && !(day_found_flag) && !(time_found_flag))
 	{
 		send_movie_date_time()
