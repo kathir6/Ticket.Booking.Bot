@@ -3,7 +3,6 @@
 `main()`
 
 {
-
 	create_socket()
 	bind_socket()
 	listen_socket()
@@ -16,8 +15,8 @@
 }
 
 `server_client()`
-{
 
+{
 	send_welcome_note()
 	check_code:
 	recv_request()
