@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     {
       cout << recv_msg << "\n";
     }
-    cout << "                    --> ";
+    cout << "                                                  --> ";
     bzero(send_msg, strlen(send_msg));
     cin.getline(send_msg, 1000);
   }

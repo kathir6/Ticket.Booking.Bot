@@ -100,11 +100,10 @@ check_recv_msg_end:
     bzero(send_msg, strlen(send_msg));
     if ((movie_flag) && (!day_flag) && (!show_flag)) 
     {
-      strcpy(send_msg, "Choose one timings from the list below\n");
+      strcpy(send_msg, "Choose one timings from the list below\n\n");
       strcat(send_msg, "     Movie Name    - ");
       strcat(send_msg, mf);
       strcat(send_msg, "\n       Timing       \n                    ");
-      strcat(send_msg, "                    ");
       strcat(send_msg, "       01              02              03              04        \n");
       strcat(send_msg, "       Today        ");
       strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        09:00 PM     \n");
@@ -119,6 +118,7 @@ check_recv_msg_end:
     {
       strcpy(send_msg, "Choose one timings from the list below\n");
       int show_slot = 01;
+      strcat(send_msg, "---------------------------------------------------------------------------------\n");
       for(int j=0; j < movie_vect.size(); ++j)
       {
         strcat(send_msg, "     Movie Name    - ");
@@ -140,7 +140,215 @@ check_recv_msg_end:
           strcat(send_msg, "      Tomorrow      ");
         }
         strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        09:00 PM    \n");
+        strcat(send_msg, "---------------------------------------------------------------------------------\n");
       }
+      strcat(send_msg, "\nPlease select a show timing by choosing a number near to it    \n");
+    }
+    /* (!movie_found_flag) && (!day_found_flag) && (time_found_flag) */
+    else if( (!movie_flag) && (!day_flag) && (show_flag) )
+    {
+      strcpy(send_msg, "Choose one timings from the list below\n");
+      int show_slot = 01;
+      for(int j=0; j < movie_vect.size(); ++j)
+      {
+        strcat(send_msg, "---------------------------------------------------------------------------------\n");
+        strcat(send_msg, "\n     Movie Name    - ");
+        strcat(send_msg, (movie_vect[j]).c_str());
+        strcat(send_msg, "\n       Timing       \n                           ");
+        sprintf(tp, "%.2d", show_slot);
+        show_slot++;
+        strcat(send_msg, tp);
+        strcat(send_msg, "\n       Today        ");
+        if( strcmp(sf, "morning") == 0 )
+        {
+          strcat(send_msg, "    09:00 AM\n");
+        }
+        else if (strcmp(sf, "noon") == 0)
+        {
+          strcat(send_msg, "    01:00 PM\n");
+        }
+        else if(strcmp(sf, "evening") == 0)
+        {
+          strcat(send_msg, "    05:00 PM\n");
+        }
+        else
+        {
+          strcat(send_msg, "    09:00 PM\n");
+        }
+        strcat(send_msg, "                           ");
+        sprintf(tp, "%.2d", show_slot);
+        show_slot++;
+        strcat(send_msg, tp);
+        strcat(send_msg, "\n      Tomorrow      ");
+        if( strcmp(sf, "morning") == 0 )
+        {
+          strcat(send_msg, "    09:00 AM\n");
+        }
+        else if (strcmp(sf, "noon") == 0)
+        {
+          strcat(send_msg, "    01:00 PM\n");
+        }
+        else if(strcmp(sf, "evening") == 0)
+        {
+          strcat(send_msg, "    05:00 PM\n");
+        }
+        else
+        {
+          strcat(send_msg, "    09:00 PM\n");
+        }
+      }
+      strcat(send_msg, "---------------------------------------------------------------------------------\n");
+      strcat(send_msg, "\nPlease select a show timing by choosing a number near to it    \n");
+    }
+    /* (movie_found_flag) && (day_found_flag) && (!time_found_flag) */
+    else if ( ((movie_flag) && (day_flag) && (!show_flag)) )
+    {
+      strcpy(send_msg, "Choose one timings from the list below\n");
+      strcat(send_msg, "     Movie Name    - ");
+      strcat(send_msg, mf);
+      strcat(send_msg, "\n       Timing       \n                    ");
+      strcat(send_msg, "       01              02              03              04        \n");
+      if( strcmp(df, "today") == 0 )
+      {
+        strcat(send_msg, "       Today        ");
+      }
+      else  
+      {
+        strcat(send_msg, "      Tomorrow      ");
+      }   
+      strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        09:00 PM     \n");
+
+      strcat(send_msg, "\nPlease select a show timing by choosing a number near to it    \n");
+    }
+    /* (movie_found_flag) && (!day_found_flag) && (time_found_flag) */
+    else if ((movie_flag) && (!day_flag) && (show_flag))
+    {
+      strcpy(send_msg, "Choose one timings from the list below\n");
+      int show_slot = 01;
+      strcat(send_msg, "\n     Movie Name    - ");
+        strcat(send_msg, mf);
+        strcat(send_msg, "\n       Timing       \n                           ");
+        sprintf(tp, "%.2d", show_slot);
+        show_slot++;
+        strcat(send_msg, tp);
+        strcat(send_msg, "\n       Today        ");
+        if( strcmp(sf, "morning") == 0 )
+        {
+          strcat(send_msg, "    09:00 AM\n");
+        }
+        else if (strcmp(sf, "noon") == 0)
+        {
+          strcat(send_msg, "    01:00 PM\n");
+        }
+        else if(strcmp(sf, "evening") == 0)
+        {
+          strcat(send_msg, "    05:00 PM\n");
+        }
+        else
+        {
+          strcat(send_msg, "    09:00 PM\n");
+        }
+        strcat(send_msg, "                           ");
+        sprintf(tp, "%.2d", show_slot);
+        show_slot++;
+        strcat(send_msg, tp);
+        strcat(send_msg, "\n      Tomorrow      ");
+        if( strcmp(sf, "morning") == 0 )
+        {
+          strcat(send_msg, "    09:00 AM\n");
+        }
+        else if (strcmp(sf, "noon") == 0)
+        {
+          strcat(send_msg, "    01:00 PM\n");
+        }
+        else if(strcmp(sf, "evening") == 0)
+        {
+          strcat(send_msg, "    05:00 PM\n");
+        }
+        else
+        {
+          strcat(send_msg, "    09:00 PM\n");
+        }
+      
+      strcat(send_msg, "\nPlease select a show timing by choosing a number near to it    \n");
+    }
+
+    else if ((!movie_flag) && (day_flag) && (show_flag))
+    {
+      strcpy(send_msg, "Choose one timings from the list below\n");
+      int show_slot = 01;
+      for(int j=0; j < movie_vect.size(); ++j)
+      {
+        strcat(send_msg, "\n     Movie Name    - ");
+        strcat(send_msg, (movie_vect[j]).c_str());
+        strcat(send_msg, "\n       Timing       \n                           ");
+        sprintf(tp, "%.2d", show_slot);
+        show_slot++;
+        strcat(send_msg, tp);
+        if ( strcmp(df, "today") == 0 )
+        {
+          strcat(send_msg, "\n       Today        ");
+        }
+        else 
+        {
+          strcat(send_msg, "\n      Tomorrow      ");
+        }
+        if( strcmp(sf, "morning") == 0 )
+        {
+          strcat(send_msg, "    09:00 AM\n");
+        }
+        else if (strcmp(sf, "noon") == 0)
+        {
+          strcat(send_msg, "    01:00 PM\n");
+        }
+        else if(strcmp(sf, "evening") == 0)
+        {
+          strcat(send_msg, "    05:00 PM\n");
+        }
+        else
+        {
+          strcat(send_msg, "    09:00 PM\n");
+        }
+      }
+      strcat(send_msg, "\nPlease select a show timing by choosing a number near to it    \n");
+    }
+    
+    else if ((movie_flag) && (day_flag) && (show_flag))
+    {
+      strcpy(send_msg, "Choose one timings from the list below\n");
+      int show_slot = 01;
+      strcat(send_msg, "\n     Movie Name    - ");
+      strcat(send_msg, mf);
+        strcat(send_msg, "\n       Timing       \n                           ");
+        sprintf(tp, "%.2d", show_slot);
+        show_slot++;
+        strcat(send_msg, tp);
+        if ( strcmp(df, "today") == 0 )
+        {
+          strcat(send_msg, "\n       Today        ");
+        }
+        else 
+        {
+          strcat(send_msg, "\n      Tomorrow      ");
+        }
+        if( strcmp(sf, "morning") == 0 )
+        {
+          strcat(send_msg, "    09:00 AM\n");
+        }
+        else if (strcmp(sf, "noon") == 0)
+        {
+          strcat(send_msg, "    01:00 PM\n");
+        }
+        else if(strcmp(sf, "evening") == 0)
+        {
+          strcat(send_msg, "    05:00 PM\n");
+        }
+        else
+        {
+          strcat(send_msg, "    09:00 PM\n");
+        }
+      
+      strcat(send_msg, "\nPlease select a show timing by choosing a number near to it    \n");      
     }
     else if ((!movie_flag) && (!day_flag) && (!show_flag))
     {
@@ -167,9 +375,14 @@ check_recv_msg_end:
       bzero(recv_msg, strlen(recv_msg));
       recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
       cout << "      from client   : " << recv_msg << "\n";
+
       if(recvS == -1)
       {
         cout << "      from client   : failed\n"; exit(0);
+      }
+      else if (strcmp(recv_msg, "bye") == 0)
+      {
+        goto connect_end;
       }
       else if (strcmp(recv_msg, "yes") == 0) 
       {
@@ -205,7 +418,9 @@ check_recv_msg_end:
       }
     }
 
-    /* send option list */
+    /* send option list */    //strcpy(send_msg, "dummy2");
+
+
     sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
     if (sendS == -1) 
     {
