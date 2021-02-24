@@ -70,7 +70,7 @@
 		else if(no_continue)
 		{
 			send_end_note()
-			`close()`
+			close()
 		}
 	}
 	recv_option()
@@ -79,5 +79,5 @@
 	send_ticket_price()
 	recv_confirmation()
 	send_end_note()
-	`close()`
+	close()
 }
