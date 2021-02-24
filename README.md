@@ -19,7 +19,7 @@
 `server_client()`
 
 {
-	
+
 	send_welcome_note()
 	check_code:
 	recv_request()
@@ -58,7 +58,7 @@
 	{
 		send_particular_show()
 	}
-	else if(no_general_flag)
+	else if( (!movie_found_flag) && (!day_found_flag) && (!time_found_flag) )
 	{
 		send_continue
 		recv_yes_or_no
