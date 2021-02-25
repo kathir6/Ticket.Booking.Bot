@@ -16,11 +16,13 @@
 #include <unistd.h>
 #include <vector>
 #include <time.h>
-#include <stdio.h>
 
 using namespace std;
 
 void *server_client(void *);
+
+int list_movie_fun(char *check_msg);
+int show_check_fun(char *check_msg);;
 
 void tomorrow_date();
 struct arg
