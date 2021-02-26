@@ -4,10 +4,10 @@ void *server_client(void *arg_thread) {
   struct arg *args_thread = (struct arg *)arg_thread;
   int connFD = args_thread->connFD, sendS, recvS, closeS, showslot,
       ticket_count, ticket_price, movie_flag = 0, day_flag = 0, show_flag = 0;
-  char recv_msg[1500], tp[100], mf[100], df[100], sf[100];
+  char recv_msg[1500], tp[100], mf[100], df[100], sf[100], temp[100];
   // char *send_msg = new char[2000];
   char send_msg[1500];
-  int list_movie_flag = 0, show_check_flag = 0, movie_check_flag = 0;
+  int list_movie_flag = 0, show_check_flag = 0, movie_check_flag = 0, next_2_day = 0;
   vector<string> movie_vect, day_vect, show_vect;
   char *words;
 
@@ -56,6 +56,7 @@ void *server_client(void *arg_thread) {
     list_movie_flag = list_movie_fun(recv_msg);
     show_check_flag = show_check_fun(recv_msg);
     movie_flag = day_flag = show_flag = 0;
+    next_2_day = get_next_two_day(recv_msg);
     for (int i = 0; i < sizeof(recv_msg); ++i) {
       recv_msg[i] = tolower(recv_msg[i]);
     }
@@ -99,13 +100,14 @@ void *server_client(void *arg_thread) {
       strcat(send_msg, "\n       Timing       \n                    ");
       strcat(send_msg, "       01              02              03              "
                        "04        \n");
-      strcat(send_msg, "      Tomorrow      ");
+
+      strcat(send_msg, tomorrow().c_str());
       strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        "
                        "09:00 PM     \n");
       strcat(send_msg, "                    ");
       strcat(send_msg, "       05              06              07              "
                        "08        \n");
-      strcat(send_msg, " Day after Tomorrow ");
+      strcat(send_msg, day_after_tomorrow().c_str());
       strcat(
           send_msg,
           "    09:00 AM        01:00 PM        05:00 PM        09:00 PM    \n");
@@ -129,9 +131,9 @@ void *server_client(void *arg_thread) {
           strcat(send_msg, "              ");
         }
         if (strcmp(df, "tomorrow") == 0) {
-          strcat(send_msg, "\n      Tomorrow      ");
+          strcat(send_msg, "\n");      strcat(send_msg, tomorrow().c_str());
         } else if (strcmp(df, "day after tomorrow") == 0) {
-          strcat(send_msg, "\n Day after Tomorrow ");
+          strcat(send_msg, "\n");      strcat(send_msg, day_after_tomorrow().c_str());
         }
         strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        "
                          "09:00 PM    \n");
@@ -154,7 +156,7 @@ void *server_client(void *arg_thread) {
         sprintf(tp, "%.2d", show_slot);
         show_slot++;
         strcat(send_msg, tp);
-        strcat(send_msg, "\n      Tomorrow      ");
+        strcat(send_msg, "\n");      strcat(send_msg, tomorrow().c_str());
         if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
           strcat(send_msg, "    09:00 AM\n");
         } else if (strcmp(sf, "noon") == 0 || show_check_flag == 2) {
@@ -168,7 +170,7 @@ void *server_client(void *arg_thread) {
         sprintf(tp, "%.2d", show_slot);
         show_slot++;
         strcat(send_msg, tp);
-        strcat(send_msg, "\n Day after Tomorrow ");
+        strcat(send_msg, "\n");      strcat(send_msg, day_after_tomorrow().c_str());
         if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
           strcat(send_msg, "    09:00 AM\n");
         } else if (strcmp(sf, "noon") == 0 || show_check_flag == 2) {
@@ -193,9 +195,9 @@ void *server_client(void *arg_thread) {
       strcat(send_msg, "       01              02              03              "
                        "04        \n");
       if (strcmp(df, "tomorrow") == 0) {
-        strcat(send_msg, "      Tomorrow      ");
+        strcat(send_msg, tomorrow().c_str());
       } else {
-        strcat(send_msg, " Day after Tomorrow ");
+        strcat(send_msg, day_after_tomorrow().c_str());
       }
       strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        "
                        "09:00 PM     \n");
@@ -213,7 +215,7 @@ void *server_client(void *arg_thread) {
       sprintf(tp, "%.2d", show_slot);
       show_slot++;
       strcat(send_msg, tp);
-      strcat(send_msg, "\n      Tomorrow      ");
+      strcat(send_msg, "\n");      strcat(send_msg, tomorrow().c_str());
       if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
         strcat(send_msg, "    09:00 AM\n");
       } else if (strcmp(sf, "noon") == 0 || show_check_flag == 2) {
@@ -227,7 +229,7 @@ void *server_client(void *arg_thread) {
       sprintf(tp, "%.2d", show_slot);
       show_slot++;
       strcat(send_msg, tp);
-      strcat(send_msg, "\n Day after Tomorrow ");
+      strcat(send_msg, "\n");      strcat(send_msg, day_after_tomorrow().c_str());
       if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
         strcat(send_msg, "    09:00 AM\n");
       } else if (strcmp(sf, "noon") == 0 || show_check_flag == 2) {
@@ -253,9 +255,9 @@ void *server_client(void *arg_thread) {
         show_slot++;
         strcat(send_msg, tp);
         if (strcmp(df, "tomorrow") == 0) {
-          strcat(send_msg, "\n      Tomorrow      ");
+          strcat(send_msg, "\n");      strcat(send_msg, tomorrow().c_str());
         } else {
-          strcat(send_msg, "\n Day after Tomorrow ");
+          strcat(send_msg, "\n");      strcat(send_msg, day_after_tomorrow().c_str());
         }
         if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
           strcat(send_msg, "    09:00 AM\n");
@@ -281,9 +283,9 @@ void *server_client(void *arg_thread) {
       show_slot++;
       strcat(send_msg, tp);
       if (strcmp(df, "tomorrow") == 0) {
-        strcat(send_msg, "\n      Tomorrow      ");
+        strcat(send_msg, "\n");      strcat(send_msg, tomorrow().c_str());
       } else {
-        strcat(send_msg, "\n Day after Tomorrow ");
+        strcat(send_msg, "\n");      strcat(send_msg, day_after_tomorrow().c_str());
       }
       if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
         strcat(send_msg, "    09:00 AM\n");

@@ -16,6 +16,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <vector>
+#include <ctime> /* for tomorrow date calculation */ 
 
 using namespace std;
 
@@ -24,7 +25,18 @@ void *server_client(void *);
 int list_movie_fun(char *check_msg);
 int show_check_fun(char *check_msg);
 
-void tomorrow_date();
 struct arg {
   int connFD;
 };
+
+struct struct_date
+{
+  int date;
+  int month;
+  int year;
+};
+
+string tomorrow();
+string day_after_tomorrow();
+
+int get_next_two_day(char *check_msg);

@@ -40,3 +40,108 @@ int show_check_fun(char *check_msg) {
     return 0;
   }
 }
+
+int daysPerMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+int leapyear(int year) {
+    return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+    }
+
+struct_date get_tomorrow_date(struct struct_date now) {
+    int daysmon = daysPerMonth[now.month-1];
+    if (leapyear(now.year) && now.month == 2)
+        daysmon++;
+    if (++now.date > daysmon) {
+        now.date = 1;
+        if (++now.month > 12) {
+            now.month = 1;
+            now.year++;
+        }
+    }
+    return now;
+}
+
+string tomorrow()
+{
+  char tom_date[100];
+
+  time_t c_time;
+  time(&c_time);
+  tm *cs_time = localtime(&c_time);
+  char c_date[500], temp[100];
+
+  struct_date today_date, tomorrow_date;
+  today_date.date = cs_time->tm_mday;
+  today_date.month = cs_time->tm_mon + 1;
+  today_date.year = cs_time->tm_year + 1900;
+
+  tomorrow_date = get_tomorrow_date(today_date);
+
+  strcpy(tom_date, "     ");
+  sprintf(temp, "%.2d", tomorrow_date.date);
+  strcat(tom_date, temp);
+  strcat(tom_date, "-");
+  sprintf(temp, "%.2d", tomorrow_date.month);
+  strcat(tom_date, temp);
+  strcat(tom_date, "-");
+  sprintf(temp, "%.2d", tomorrow_date.year);
+  strcat(tom_date, temp);
+  strcat(tom_date, "     ");
+
+  return tom_date;
+}
+
+string day_after_tomorrow()
+{
+  char tom_date[100];
+
+  time_t c_time;
+  time(&c_time);
+  tm *cs_time = localtime(&c_time);
+  char c_date[500], temp[100];
+
+  struct_date today_date, tomorrow_date, day_after;
+  today_date.date = cs_time->tm_mday;
+  today_date.month = cs_time->tm_mon + 1;
+  today_date.year = cs_time->tm_year + 1900;
+
+  day_after = get_tomorrow_date(today_date);
+  tomorrow_date = get_tomorrow_date(day_after);
+  
+  strcpy(tom_date, "     ");
+  sprintf(temp, "%.2d", tomorrow_date.date);
+  strcat(tom_date, temp);
+  strcat(tom_date, "-");
+  sprintf(temp, "%.2d", tomorrow_date.month);
+  strcat(tom_date, temp);
+  strcat(tom_date, "-");
+  sprintf(temp, "%.2d", tomorrow_date.year);
+  strcat(tom_date, temp);
+  strcat(tom_date, "     ");
+
+  return tom_date;
+}
+
+int get_next_two_day(char *check_msg)
+{
+/*  time_t c_time;
+  time(&c_time);
+  tm *cs_time = localtime(&c_time);
+  char c_date[500], temp[100];
+
+  struct_date today_date;
+  today_date.date = cs_time->tm_mday;
+  sprintf(temp, "%.2d", tomorrow_date.date);
+  strcat(tom_date, temp);
+  strcat(tom_date, "-");
+  today_date.month = cs_time->tm_mon + 1;
+  sprintf(temp, "%.2d", tomorrow_date.month);
+  strcat(tom_date, temp);
+  strcat(tom_date, "-");
+  today_date.year = cs_time->tm_year + 1900;
+  sprintf(temp, "%.2d", tomorrow_date.year);
+  strcat(tom_date, temp);
+  
+*/
+  return 0;
+}
