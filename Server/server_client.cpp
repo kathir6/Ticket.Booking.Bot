@@ -2,6 +2,7 @@
 
 void *server_client(void *arg_thread) {
   struct arg *args_thread = (struct arg *)arg_thread;
+  struct ticket_detail movie_ticket;
   int connFD = args_thread->connFD, sendS, recvS, closeS, showslot,
       ticket_count, ticket_price, movie_flag = 0, day_flag = 0, show_flag = 0;
   char recv_msg[1500], tp[100], mf[100], df[100], sf[100], temp[100];
@@ -42,6 +43,7 @@ void *server_client(void *arg_thread) {
 
   check_movie:
     /* recv_request */
+    memset(&movie_ticket, 0, sizeof(movie_ticket));
     bzero(recv_msg, sizeof(recv_msg));
     recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
     cout << "      from client   : " << recv_msg << "\n";

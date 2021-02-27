@@ -40,3 +40,11 @@ string tomorrow();
 string day_after_tomorrow();
 
 int get_next_two_day(char *check_msg);
+
+struct ticket_detail
+{
+  char movie_name[100];
+  char movie_time[100];
+  int ticket_count;
+  int ticket_price;
+};
