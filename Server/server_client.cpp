@@ -3,6 +3,8 @@
 void *server_client(void *arg_thread) {
   struct arg *args_thread = (struct arg *)arg_thread;
   struct ticket_detail movie_ticket;
+  int show_slot_dis, highest_slot;
+  map <int, ticket_detail> dis_timings;
   int connFD = args_thread->connFD, sendS, recvS, closeS, showslot,
       ticket_count, ticket_price, movie_flag = 0, day_flag = 0, show_flag = 0;
   char recv_msg[1500], tp[100], mf[100], df[100], sf[100], temp[100];
@@ -72,11 +74,11 @@ void *server_client(void *arg_thread) {
     }
     // for(int i=0; i < day_vect.size(); ++i)
     {
-      if (strstr(recv_msg, ((day_vect[1]).c_str()))) {
+      if (strstr(recv_msg, ((day_vect[1]).c_str())) || (next_2_day == 2)) {
         day_flag = 1;
         strcpy(df, (day_vect[1]).c_str());
         cout << "      day found     : success\n";
-      } else if (strstr(recv_msg, ((day_vect[0]).c_str()))) {
+      } else if (strstr(recv_msg, ((day_vect[0]).c_str())) || (next_2_day == 1)) {
         day_flag = 1;
         strcpy(df, (day_vect[0]).c_str());
         cout << "      day found     : success\n";
@@ -93,20 +95,44 @@ void *server_client(void *arg_thread) {
     if (show_flag || show_check_flag) {
       show_flag = 1;
     }
+    /* only movie found */
     /* movie_found_flag && !(day_found_flag) && !(time_found_flag) */
     bzero(send_msg, strlen(send_msg));
     if ((movie_flag) && (!day_flag) && (!show_flag)) {
       strcpy(send_msg, "Choose one timings from the list below\n\n");
-      strcat(send_msg, "     Movie Name    - ");
+  // map
+  highest_slot = 8;
+      for(show_slot_dis = 1; show_slot_dis < 9; ++show_slot_dis)
+      {
+        strcpy(movie_ticket.movie_name, mf); // map
+        if(show_slot_dis <= 4)
+        {
+          strcpy(movie_ticket.date, tomorrow().c_str()); // map
+        }
+        else if (show_slot_dis > 4)
+                strcpy(movie_ticket.date, day_after_tomorrow().c_str());
+          if(show_slot_dis%4 == 1)
+          strcpy(movie_ticket.show, "09:00 AM");
+          else if (show_slot_dis%4 == 2)
+          strcpy(movie_ticket.show, "01:00 PM");
+          else if (show_slot_dis%4 == 3)
+          strcpy(movie_ticket.show, "05:00 PM");
+          else if (show_slot_dis%4 == 0)
+          strcpy(movie_ticket.show, "09:00 PM");
+        
+        dis_timings.insert(pair<int, ticket_detail>(show_slot_dis, movie_ticket));
+      }
+      
+      strcat(send_msg, "\t     Movie Name    - ");
       strcat(send_msg, mf);
-      strcat(send_msg, "\n       Timing       \n                    ");
+      strcat(send_msg, "\n       Timing       \n               ");
       strcat(send_msg, "       01              02              03              "
                        "04        \n");
 
       strcat(send_msg, tomorrow().c_str());
       strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        "
                        "09:00 PM     \n");
-      strcat(send_msg, "                    ");
+      strcat(send_msg, "               ");
       strcat(send_msg, "       05              06              07              "
                        "08        \n");
       strcat(send_msg, day_after_tomorrow().c_str());
@@ -116,9 +142,43 @@ void *server_client(void *arg_thread) {
       strcat(send_msg, "\nPlease select a show timing by choosing a number "
                        "near to it    \n");
     }
+    /* only date found */
     /* (!movie_found_flag) && (day_found_flag) && !(time_found_flag) */
     else if ((!movie_flag) && (day_flag) && (!show_flag)) {
       strcpy(send_msg, "Choose one timings from the list below\n");
+      cout << "map start\n";
+      
+      highest_slot = movie_vect.size() * 4;
+      // map
+      int q=0;
+      for(show_slot_dis = 1; show_slot_dis <= (movie_vect.size() * 4); ++show_slot_dis)
+      {
+        cout << show_slot_dis << "\n";
+        //for(; q < movie_vect.size(); q = (show_slot_dis-1)/4 )
+        q = (show_slot_dis-1)/4;
+        {strcpy(movie_ticket.movie_name, (movie_vect[q]).c_str());
+        cout << q << "\n";
+        } // map
+
+        if (strcmp(df, "tomorrow") == 0) {
+                strcpy(movie_ticket.date, tomorrow().c_str());
+        } else if (strcmp(df, "day after tomorrow") == 0) {
+          strcpy(movie_ticket.date, day_after_tomorrow().c_str());
+        }
+
+          if(show_slot_dis%4 == 1)
+          strcpy(movie_ticket.show, "09:00 AM");
+          else if (show_slot_dis%4 == 2)
+          strcpy(movie_ticket.show, "01:00 PM");
+          else if (show_slot_dis%4 == 3)
+          strcpy(movie_ticket.show, "05:00 PM");
+          else if (show_slot_dis%4 == 0)
+          strcpy(movie_ticket.show, "09:00 PM");
+        
+        dis_timings.insert(pair<int, ticket_detail>(show_slot_dis, movie_ticket));
+        
+      }
+
       int show_slot = 01;
       strcat(send_msg, "-------------------------------------------------------"
                        "--------------------------\n");
@@ -145,9 +205,52 @@ void *server_client(void *arg_thread) {
       strcat(send_msg, "\nPlease select a show timing by choosing a number "
                        "near to it    \n");
     }
+    /*only show found */
     /* (!movie_found_flag) && (!day_found_flag) && (time_found_flag) */
     else if ((!movie_flag) && (!day_flag) && (show_flag)) {
       strcpy(send_msg, "Choose one timings from the list below\n");
+
+
+      highest_slot = movie_vect.size() * 2;
+      // map
+      int q=0;
+      for(show_slot_dis = 1; show_slot_dis <= (movie_vect.size() * 2); ++show_slot_dis)
+      {
+        //cout << show_slot_dis << "\n";
+        //for(; q < movie_vect.size(); q = (show_slot_dis-1)/4 )
+        q = (show_slot_dis-1)/2;
+        {strcpy(movie_ticket.movie_name, (movie_vect[q]).c_str());
+       // cout << q << "\n";
+        } // map
+
+        if (show_slot_dis % 2 == 1) {
+                strcpy(movie_ticket.date, tomorrow().c_str());
+        } else if (show_slot_dis % 2 == 0) {
+          strcpy(movie_ticket.date, day_after_tomorrow().c_str());
+        }
+/*
+          if(show_slot_dis == 1)
+          strcpy(movie_ticket.show, "09:00 AM");
+          else if (show_slot_dis == 2)
+          strcpy(movie_ticket.show, "01:00 PM");
+          else if (show_slot_dis == 3)
+          strcpy(movie_ticket.show, "05:00 PM");
+          else if (show_slot_dis == 4)
+          strcpy(movie_ticket.show, "09:00 PM");
+*/
+        if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
+          strcpy(movie_ticket.show, "09:00 AM");
+        } else if (strcmp(sf, "noon") == 0 || show_check_flag == 2) {
+          strcpy(movie_ticket.show, "01:00 PM");
+        } else if (strcmp(sf, "evening") == 0 || show_check_flag == 3) {
+          strcpy(movie_ticket.show, "05:00 PM");
+        } else if (strcmp(sf, "night") == 0 || show_check_flag == 4) {
+          strcpy(movie_ticket.show, "09:00 PM");
+        }
+
+        dis_timings.insert(pair<int, ticket_detail>(show_slot_dis, movie_ticket));
+        
+      }
       int show_slot = 01;
       for (int j = 0; j < movie_vect.size(); ++j) {
         strcat(send_msg, "-----------------------------------------------------"
@@ -188,9 +291,37 @@ void *server_client(void *arg_thread) {
       strcat(send_msg, "\nPlease select a show timing by choosing a number "
                        "near to it    \n");
     }
+    /* movie and date found */
     /* (movie_found_flag) && (day_found_flag) && (!time_found_flag) */
     else if (((movie_flag) && (day_flag) && (!show_flag))) {
       strcpy(send_msg, "Choose one timings from the list below\n");
+
+      highest_slot = 4;
+      // map
+      int q=0;
+      for(show_slot_dis = 1; show_slot_dis < 5; ++show_slot_dis)
+      {
+        strcpy(movie_ticket.movie_name, mf);
+
+        if (strcmp("tomorrow", df) == 0){
+                strcpy(movie_ticket.date, tomorrow().c_str());
+        } else if (strcmp("day after tomorrow", df) == 0) {
+          strcpy(movie_ticket.date, day_after_tomorrow().c_str());
+        }
+
+        if(show_slot_dis == 1)
+          strcpy(movie_ticket.show, "09:00 AM");
+          else if (show_slot_dis == 2)
+          strcpy(movie_ticket.show, "01:00 PM");
+          else if (show_slot_dis == 3)
+          strcpy(movie_ticket.show, "05:00 PM");
+          else if (show_slot_dis == 4)
+          strcpy(movie_ticket.show, "09:00 PM");
+
+        dis_timings.insert(pair<int, ticket_detail>(show_slot_dis, movie_ticket));
+        
+      }
+
       strcat(send_msg, "     Movie Name    - ");
       strcat(send_msg, mf);
       strcat(send_msg, "\n       Timing       \n                    ");
@@ -207,9 +338,47 @@ void *server_client(void *arg_thread) {
       strcat(send_msg, "\nPlease select a show timing by choosing a number "
                        "near to it    \n");
     }
+    /* movie and time found */
     /* (movie_found_flag) && (!day_found_flag) && (time_found_flag) */
     else if (((movie_flag) && (!day_flag) && (show_flag))) {
       strcpy(send_msg, "Choose one timings from the list below\n");
+
+      highest_slot = 2;
+      // map
+      int q=0;
+      for(show_slot_dis = 1; show_slot_dis <= 2; ++show_slot_dis)
+      {
+        strcpy(movie_ticket.movie_name, mf);
+      
+        if (show_slot_dis % 2 == 1) {
+                strcpy(movie_ticket.date, tomorrow().c_str());
+        } else if (show_slot_dis % 2 == 0) {
+          strcpy(movie_ticket.date, day_after_tomorrow().c_str());
+        }
+/*
+          if(show_slot_dis == 1)
+          strcpy(movie_ticket.show, "09:00 AM");
+          else if (show_slot_dis == 2)
+          strcpy(movie_ticket.show, "01:00 PM");
+          else if (show_slot_dis == 3)
+          strcpy(movie_ticket.show, "05:00 PM");
+          else if (show_slot_dis == 4)
+          strcpy(movie_ticket.show, "09:00 PM");
+*/
+        if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
+          strcpy(movie_ticket.show, "09:00 AM");
+        } else if (strcmp(sf, "noon") == 0 || show_check_flag == 2) {
+          strcpy(movie_ticket.show, "01:00 PM");
+        } else if (strcmp(sf, "evening") == 0 || show_check_flag == 3) {
+          strcpy(movie_ticket.show, "05:00 PM");
+        } else if (strcmp(sf, "night") == 0 || show_check_flag == 4) {
+          strcpy(movie_ticket.show, "09:00 PM");
+        }
+
+        dis_timings.insert(pair<int, ticket_detail>(show_slot_dis, movie_ticket));
+        
+      }
+
       int show_slot = 01;
       strcat(send_msg, "\n     Movie Name    - ");
       strcat(send_msg, mf);
@@ -245,9 +414,53 @@ void *server_client(void *arg_thread) {
       strcat(send_msg, "\nPlease select a show timing by choosing a number "
                        "near to it    \n");
     }
-
+    /*date and time found*/
+        /* (!movie_found_flag) && (day_found_flag) && (time_found_flag) */
     else if ((!movie_flag) && (day_flag) && (show_flag)) {
       strcpy(send_msg, "Choose one timings from the list below\n");
+
+      highest_slot = movie_vect.size();
+      // map
+      int q=0;
+      for(show_slot_dis = 1; show_slot_dis <= movie_vect.size(); ++show_slot_dis)
+      {
+        //cout << show_slot_dis << "\n";
+        //for(; q < movie_vect.size(); q = (show_slot_dis-1)/4 )
+        q = (show_slot_dis-1);
+        {strcpy(movie_ticket.movie_name, (movie_vect[q]).c_str());
+       // cout << q << "\n";
+        } // map
+
+        if (strcmp(df, "tomorrow") == 0) {
+                strcpy(movie_ticket.date, tomorrow().c_str());
+        } else if (strcmp(df, "day after tomorrow") == 0) {
+          strcpy(movie_ticket.date, day_after_tomorrow().c_str());
+        }
+/*
+          if(show_slot_dis == 1)
+          strcpy(movie_ticket.show, "09:00 AM");
+          else if (show_slot_dis == 2)
+          strcpy(movie_ticket.show, "01:00 PM");
+          else if (show_slot_dis == 3)
+          strcpy(movie_ticket.show, "05:00 PM");
+          else if (show_slot_dis == 4)
+          strcpy(movie_ticket.show, "09:00 PM");
+*/
+        if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
+          strcpy(movie_ticket.show, "09:00 AM");
+        } else if (strcmp(sf, "noon") == 0 || show_check_flag == 2) {
+          strcpy(movie_ticket.show, "01:00 PM");
+        } else if (strcmp(sf, "evening") == 0 || show_check_flag == 3) {
+          strcpy(movie_ticket.show, "05:00 PM");
+        } else if (strcmp(sf, "night") == 0 || show_check_flag == 4) {
+          strcpy(movie_ticket.show, "09:00 PM");
+        }
+
+        dis_timings.insert(pair<int, ticket_detail>(show_slot_dis, movie_ticket));
+        
+      }
+
+
       int show_slot = 01;
       for (int j = 0; j < movie_vect.size(); ++j) {
         strcat(send_msg, "\n     Movie Name    - ");
@@ -274,9 +487,54 @@ void *server_client(void *arg_thread) {
       strcat(send_msg, "\nPlease select a show timing by choosing a number "
                        "near to it    \n");
     }
+    /* all found */
+    /* (movie_found_flag) && (day_found_flag) && (time_found_flag) */
 
     else if ((movie_flag) && (day_flag) && (show_flag)) {
       strcpy(send_msg, "Choose one timings from the list below\n");
+
+      highest_slot = 1;
+      // map
+      int q=0;
+      for(show_slot_dis = 1; show_slot_dis <= 1; ++show_slot_dis)
+      {
+        //cout << show_slot_dis << "\n";
+        //for(; q < movie_vect.size(); q = (show_slot_dis-1)/4 )
+        q = (show_slot_dis-1);
+        {strcpy(movie_ticket.movie_name, mf);
+       // cout << q << "\n";
+        } // map
+
+        if (strcmp(df, "tomorrow") == 0) {
+                strcpy(movie_ticket.date, tomorrow().c_str());
+        } else if (strcmp(df, "day after tomorrow") == 0) {
+          strcpy(movie_ticket.date, day_after_tomorrow().c_str());
+        }
+/*
+          if(show_slot_dis == 1)
+          strcpy(movie_ticket.show, "09:00 AM");
+          else if (show_slot_dis == 2)
+          strcpy(movie_ticket.show, "01:00 PM");
+          else if (show_slot_dis == 3)
+          strcpy(movie_ticket.show, "05:00 PM");
+          else if (show_slot_dis == 4)
+          strcpy(movie_ticket.show, "09:00 PM");
+*/
+        if (strcmp(sf, "morning") == 0 || show_check_flag == 1) {
+          strcpy(movie_ticket.show, "09:00 AM");
+        } else if (strcmp(sf, "noon") == 0 || show_check_flag == 2) {
+          strcpy(movie_ticket.show, "01:00 PM");
+        } else if (strcmp(sf, "evening") == 0 || show_check_flag == 3) {
+          strcpy(movie_ticket.show, "05:00 PM");
+        } else if (strcmp(sf, "night") == 0 || show_check_flag == 4) {
+          strcpy(movie_ticket.show, "09:00 PM");
+        }
+
+        dis_timings.insert(pair<int, ticket_detail>(show_slot_dis, movie_ticket));
+        
+      }
+
+
       int show_slot = 01;
       strcat(send_msg, "\n     Movie Name    - ");
       strcat(send_msg, mf);
@@ -304,6 +562,7 @@ void *server_client(void *arg_thread) {
     }
     /*--------------------------------------------------------------------
     ----------------------------------------------------------------------*/
+    /* list movie found and nothing found */
     else if (list_movie_flag == 1 ||
              (!movie_flag) && (!day_flag) && (!show_flag)) {
       if (list_movie_flag == 1) {
@@ -327,7 +586,7 @@ void *server_client(void *arg_thread) {
       } else {
         cout << "      to client     : success\n";
       }
-
+yes_or_no_cont:
       /* recv_continue */
       bzero(recv_msg, strlen(recv_msg));
       recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
@@ -366,8 +625,19 @@ void *server_client(void *arg_thread) {
           cout << "No Continue\n      to client     : success\n";
         }
       }
+      else
+      {
+        bzero(send_msg, sizeof(send_msg));
+        strcpy(send_msg, "\nPlease re-enter (yes/no) to continue\n");
+        sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
+        goto yes_or_no_cont;
+      }
     }
-
+/* end of option list creation */
+/*-------------------------------------------------
+-----------------------------------------------------
+-------------------------------------------------------
+---------------------------------------------------------*/
     /* send option list */ // strcpy(send_msg, "dummy2");
 
     sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
@@ -376,7 +646,7 @@ void *server_client(void *arg_thread) {
     } else {
       cout << "      to client     : success\n";
     }
-
+listen_show_slot:
     /* recv_option */
     bzero(recv_msg, strlen(recv_msg));
     recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
@@ -388,6 +658,14 @@ void *server_client(void *arg_thread) {
     /* send_ticket_count */
     bzero(send_msg, strlen(send_msg));
     showslot = atoi(recv_msg);
+    cout << showslot << "\n";
+    if( (showslot < 1) || (showslot > highest_slot) )
+    {
+      strcpy(send_msg, "\nPlease enter the correct show slot\n");
+      sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
+      goto listen_show_slot;
+    }
+    else
     strcpy(send_msg,
            "\nHow many tickets do you want?\nCount should be from 1 to 10\n");
 
@@ -412,12 +690,27 @@ void *server_client(void *arg_thread) {
     } else {
       bzero(send_msg, strlen(send_msg));
       ticket_count = atoi(recv_msg);
+
+      map<int, ticket_detail>::iterator itr; 
+      itr = dis_timings.find(showslot);
+
+      itr->second.ticket_count = ticket_count;
+
       if ((ticket_count > 0) && (ticket_count < 11)) {
         ticket_price = ticket_count * 140;
-        strcpy(send_msg, "Ticket Price : ");
+        strcpy(send_msg, "\n******TICKET DETAILS******\nMovie Name   : ");
+        strcat(send_msg, itr->second.movie_name);
+        strcat(send_msg, "\nDate         : ");
+        strcat(send_msg, itr->second.date);
+        strcat(send_msg, "\nTime         : ");
+        strcat(send_msg, itr->second.show);
+        strcat(send_msg, "\nTicket Count : ");
+        sprintf(tp, "%d", itr->second.ticket_count);
+        strcat(send_msg, tp);
+        strcat(send_msg, "\nTicket Price : ");
         sprintf(tp, "%d", ticket_price);
         strcat(send_msg, tp);
-        strcat(send_msg, "\nPlease confirm to book tickets (yes/no) . . . ");
+        strcat(send_msg, "\n\nPlease confirm to book tickets (yes/no) . . . ");
       } else {
         bzero(send_msg, strlen(send_msg));
         strcpy(send_msg, "Ticket Count seems invalid\nPlease input again "
@@ -439,7 +732,7 @@ void *server_client(void *arg_thread) {
     } else {
       cout << "      to client     : success\n";
     }
-
+yes_or_no_confirm:
     /* recv_confirmation */
     bzero(recv_msg, strlen(recv_msg));
     recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
@@ -463,6 +756,13 @@ void *server_client(void *arg_thread) {
         strcpy(send_msg,
                "\n\nThank You for contacting :)))\nPlease reach out the system "
                "for any help\nTo close connection enter \"bye\"");
+      }
+      else
+      {
+        bzero(send_msg, strlen(send_msg));
+        strcpy(send_msg, "\nPlease re-enter your confirmation (yes/no)\n");
+        sendS = send(connFD, (char *)&send_msg, strlen(send_msg), 0);
+        goto yes_or_no_confirm;
       }
     }
 

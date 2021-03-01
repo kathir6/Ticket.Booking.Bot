@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     args_in.connFD = connFD;
     pthread_create(&thread_vect[thread_vect.size()], NULL, &server_client,
                    (void *)&args_in);
-    pthread_join(thread_vect[thread_vect.size()], NULL);
+    //pthread_join(thread_vect[thread_vect.size()], NULL);
   }
   return 0;
 }

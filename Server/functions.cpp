@@ -77,9 +77,9 @@ string tomorrow()
 
   tomorrow_date = get_tomorrow_date(today_date);
 
-  strcpy(tom_date, "     ");
+  //strcpy(tom_date, "     ");
   sprintf(temp, "%.2d", tomorrow_date.date);
-  strcat(tom_date, temp);
+  strcpy(tom_date, temp);
   strcat(tom_date, "-");
   sprintf(temp, "%.2d", tomorrow_date.month);
   strcat(tom_date, temp);
@@ -108,9 +108,9 @@ string day_after_tomorrow()
   day_after = get_tomorrow_date(today_date);
   tomorrow_date = get_tomorrow_date(day_after);
   
-  strcpy(tom_date, "     ");
+  //strcpy(tom_date, "     ");
   sprintf(temp, "%.2d", tomorrow_date.date);
-  strcat(tom_date, temp);
+  strcpy(tom_date, temp);
   strcat(tom_date, "-");
   sprintf(temp, "%.2d", tomorrow_date.month);
   strcat(tom_date, temp);
@@ -122,26 +122,71 @@ string day_after_tomorrow()
   return tom_date;
 }
 
+
+
 int get_next_two_day(char *check_msg)
 {
-/*  time_t c_time;
+  char tom_date[100], day_after_tom[100];
+  time_t c_time;
   time(&c_time);
   tm *cs_time = localtime(&c_time);
   char c_date[500], temp[100];
 
-  struct_date today_date;
+  struct_date today_date, tomorrow_date, day_after;
   today_date.date = cs_time->tm_mday;
-  sprintf(temp, "%.2d", tomorrow_date.date);
-  strcat(tom_date, temp);
-  strcat(tom_date, "-");
   today_date.month = cs_time->tm_mon + 1;
+  today_date.year = cs_time->tm_year + 1900;
+  
+  tomorrow_date = get_tomorrow_date(today_date);
+
+  sprintf(tom_date, "%.2d", tomorrow_date.date);
+  strcat(tom_date, "-");
   sprintf(temp, "%.2d", tomorrow_date.month);
   strcat(tom_date, temp);
   strcat(tom_date, "-");
-  today_date.year = cs_time->tm_year + 1900;
   sprintf(temp, "%.2d", tomorrow_date.year);
   strcat(tom_date, temp);
+
+  char tom_date_bs[100];
+
+  sprintf(tom_date_bs, "%.2d", tomorrow_date.date);
+  strcat(tom_date_bs, "/");
+  sprintf(temp, "%.2d", tomorrow_date.month);
+  strcat(tom_date_bs, temp);
+  strcat(tom_date_bs, "/");
+  sprintf(temp, "%.2d", tomorrow_date.year);
+  strcat(tom_date_bs, temp);
+
+  day_after = get_tomorrow_date(tomorrow_date);
   
-*/
-  return 0;
+  sprintf(day_after_tom, "%.2d", day_after.date);
+  strcat(day_after_tom, "-");
+  sprintf(temp, "%.2d", day_after.month);
+  strcat(day_after_tom, temp);
+  strcat(day_after_tom, "-");
+  sprintf(temp, "%.2d", day_after.year);
+  strcat(day_after_tom, temp);
+
+  char day_after_bs[100];
+
+  sprintf(day_after_bs, "%.2d", day_after.date);
+  strcat(day_after_bs, "/");
+  sprintf(temp, "%.2d", day_after.month);
+  strcat(day_after_bs, temp);
+  strcat(day_after_bs, "/");
+  sprintf(temp, "%.2d", day_after.year);
+  strcat(day_after_bs, temp);
+
+  if( (strstr(check_msg, tom_date)) || (strstr(check_msg, tom_date_bs)) )
+  {
+    return 1;
+  }
+  else if( (strstr(check_msg, day_after_tom)) || (strstr(check_msg, day_after_bs)) )
+  {
+    return 2;
+  }
+  else
+  {
+    return 0;
+  }
 }

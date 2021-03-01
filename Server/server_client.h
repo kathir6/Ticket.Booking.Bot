@@ -16,6 +16,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <vector>
+#include <map>
 #include <ctime> /* for tomorrow date calculation */ 
 
 using namespace std;
@@ -44,7 +45,8 @@ int get_next_two_day(char *check_msg);
 struct ticket_detail
 {
   char movie_name[100];
-  char movie_time[100];
+  char date[100];
+  char show[100];
   int ticket_count;
   int ticket_price;
 };
