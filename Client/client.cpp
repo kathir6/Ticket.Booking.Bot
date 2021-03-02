@@ -18,7 +18,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
-    cerr << "Usage: ip_address port" << endl;
+    cerr << "\tUsage: ip_address port" << endl;
     exit(0);
   }
   char *serverIp = argv[1];
@@ -38,10 +38,10 @@ int main(int argc, char *argv[]) {
   int connectS =
       connect(clientFD, (sockaddr *)&sendSockAddr, sizeof(sendSockAddr));
   if (connectS == -1) {
-    cout << "      connection    : failed\n";
+    cout << "\n     connection     : failed  --- " << strerror(errno) << "\n";
     exit(0);
   } else if (connectS == 0) {
-    cout << "      connection    : success\n\n";
+    cout << "\n     connection     : success\n\n";
   }
   strcpy(send_msg, "ping message");
   while (1) {
@@ -52,21 +52,21 @@ int main(int argc, char *argv[]) {
     bzero(recv_msg, strlen(recv_msg));
     recvS = recv(clientFD, (char *)&recv_msg, sizeof(recv_msg), 0);
     if (recvS == -1) {
-      cout << "        recv        : failed\n";
+      cout << "        recv        : failed  --- " << strerror(errno) << "\n";
       exit(0);
     } else {
       cout << recv_msg << "\n";
     }
-    cout << "                                                  --> ";
+    cout << "                                                            --> ";
     bzero(send_msg, strlen(send_msg));
     cin.getline(send_msg, 1000);
   }
 exit_connect:
   closeS = close(clientFD);
   if (closeS == 0) {
-    cout << "      close         : success\n";
+    cout << "       close        : success\n";
   } else {
-    cout << "      close         : failed\n";
+    cout << "       close        : failed  --- " << strerror(errno) << "\n";
     exit(0);
   }
   return 0;
