@@ -2,18 +2,14 @@
 
 void *server_client(void *arg_thread) {
   struct arg *args_thread = (struct arg *)arg_thread;
-  struct ticket_detail movie_ticket;
-  int show_slot_dis, highest_slot;
-  map <int, ticket_detail> dis_timings;
   int connFD = args_thread->connFD, sendS, recvS, closeS, showslot,
-      ticket_count, ticket_price, movie_flag = 0, day_flag = 0, show_flag = 0;
-  char recv_msg[1500], tp[100], mf[100], df[100], sf[100], temp[100];
-  // char *send_msg = new char[2000];
-  char send_msg[1500];
-  int list_movie_flag = 0, show_check_flag = 0, movie_check_flag = 0, next_2_day = 0;
-  vector<string> movie_vect, day_vect, show_vect;
+      ticket_count, ticket_price, movie_flag = 0, day_flag = 0, show_flag = 0, wel_flag = 0, list_movie_flag = 0, show_check_flag = 0, movie_check_flag = 0, next_2_day = 0, show_slot_dis, highest_slot;
+  char send_msg[1500], recv_msg[1500], tp[100], mf[100], df[100], sf[100], temp[100];
   char *words;
-
+  struct ticket_detail movie_ticket;
+  vector<string> movie_vect, day_vect, show_vect;
+  map <int, ticket_detail> dis_timings;
+  
   /* recv_start_dummy_msg*/
   bzero(recv_msg, strlen(recv_msg));
   recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
@@ -61,6 +57,7 @@ void *server_client(void *arg_thread) {
     show_check_flag = show_check_fun(recv_msg);
     movie_flag = day_flag = show_flag = 0;
     next_2_day = get_next_two_day(recv_msg);
+    wel_flag = wel_fun(recv_msg);
     for (int i = 0; i < sizeof(recv_msg); ++i) {
       recv_msg[i] = tolower(recv_msg[i]);
     }
@@ -85,7 +82,7 @@ void *server_client(void *arg_thread) {
       }
     }
     for (int i = 0; i < show_vect.size(); ++i) {
-      if (strstr(recv_msg, ((show_vect[i]).c_str()))) {
+      if (strstr(recv_msg, ((show_vect[i]).c_str())) && (!strstr(recv_msg, "good"))) {
         show_flag = 1;
         strcpy(sf, (show_vect[i]).c_str());
         cout << "     show found     : success\n";
@@ -565,7 +562,32 @@ void *server_client(void *arg_thread) {
     /* list movie found and nothing found */
     else if (list_movie_flag == 1 ||
              (!movie_flag) && (!day_flag) && (!show_flag)) {
-      if (list_movie_flag == 1) {
+      if(wel_flag == 1)
+      {
+        if( strstr(recv_msg, "hi") )
+        {
+          strcpy(send_msg, "Hi\n");
+        }
+        else if ( strstr(recv_msg, "hello") )
+        {
+          strcpy(send_msg, "Hello\n");
+        }
+        else if ( strstr(recv_msg, "hai") )
+        {
+          strcpy(send_msg, "Hai\n");
+        }
+        else if ( strstr(recv_msg, "hey") )
+        {
+          strcpy(send_msg, "Hey\n");
+        }
+        else if ( strstr(recv_msg, "good") )
+        {
+          strcpy(send_msg, (good_fun()).c_str());
+          strcat(send_msg, "\n");
+        }
+        strcat(send_msg, "Please check out the list of movies that are available currently\nSelect a movie to book a ticket\n");
+      }
+      else if (list_movie_flag == 1) {
         strcpy(send_msg, "List of Movies currently playing\n");
       } else {
         strcpy(send_msg, "Sorry :((( Movie Not Found\nBelow are the movies "
@@ -576,7 +598,10 @@ void *server_client(void *arg_thread) {
         strcat(send_msg, (movie_vect[i]).c_str());
         strcat(send_msg, "\n");
       }
-      strcat(send_msg, "Do you want to continue? (yes/no)\n");
+      if( wel_flag != 1)
+      {
+        strcat(send_msg, "Do you want to continue? (yes/no)\n");
+      }
       /* send continue request */
       sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
       if (sendS == -1) {
@@ -585,6 +610,10 @@ void *server_client(void *arg_thread) {
         exit(0);
       } else {
         cout << "      to client     : success\n";
+      }
+      if( wel_flag == 1)
+      {
+        goto check_movie;
       }
 yes_or_no_cont:
       /* recv_continue */
@@ -612,7 +641,7 @@ yes_or_no_cont:
         goto check_movie;
       } else if (strcmp(recv_msg, "no") == 0) {
         cout << "      from client   : " << recv_msg << "\n";
-        strcpy(send_msg, "Thank You for contacting :)))\nPlease reach out the "
+        strcpy(send_msg, "Thank You for contacting :)))\nHave a Nice Day\n\tPlease reach out the "
                          "system for any help\nEnter \"bye\"\n");
         /* send_end_note */
         sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
@@ -749,12 +778,12 @@ yes_or_no_confirm:
         strcpy(send_msg,
                "      Thank You :)))\n      Your Tickets have been "
                "booked\n\nThank You for "
-               "contacting :)))\nPlease reach out the system for any help\nTo "
+               "contacting :)))\nHave a Nice Day\nPlease reach out the system for any help\nTo "
                "close connection enter \"bye\"");
       } else if (strcmp(recv_msg, "no") == 0) {
         bzero(send_msg, strlen(send_msg));
         strcpy(send_msg,
-               "\n\nThank You for contacting :)))\nPlease reach out the system "
+               "\n\nThank You for contacting :)))\nHave a Nice Day\nPlease reach out the system "
                "for any help\nTo close connection enter \"bye\"");
       }
       else

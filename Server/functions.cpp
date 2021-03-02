@@ -41,6 +41,52 @@ int show_check_fun(char *check_msg) {
   }
 }
 
+int wel_fun(char *check_msg)
+{
+  vector<string> welcome_note_vect;
+  int temp_flag = 0;
+  welcome_note_vect.push_back("hi");
+  welcome_note_vect.push_back("hello");
+  welcome_note_vect.push_back("good");
+  welcome_note_vect.push_back("hai");
+  welcome_note_vect.push_back("hey");
+  for(int i=0; i<welcome_note_vect.size(); i++)
+  {
+    cout << welcome_note_vect[i] << "\n";
+    if( strstr(check_msg, (welcome_note_vect[i]).c_str()) )
+    {
+      cout << " welcome flag set\n";
+      return 1;
+    }
+    else 
+    {
+      temp_flag = 0;
+    }
+  }
+}
+
+string good_fun()
+{
+  char good[100];
+  time_t c_time;
+  time(&c_time);
+  tm *cs_time = localtime(&c_time);
+  char wel[100];
+
+  if( ( 0 <= cs_time->tm_hour ) && ( cs_time->tm_hour <= 11 ) )
+  {
+    return "Good Morning";
+  }
+  else if ( ( 12 <= cs_time->tm_hour ) && ( cs_time->tm_hour <= 16 ) )
+  {
+    return "Good Afternoon";
+  }
+  else if ( ( 17 <= cs_time->tm_hour ) && ( cs_time->tm_hour <= 21 ) )
+  {
+    return "Good Evening";
+  }
+}
+
 int daysPerMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 int leapyear(int year) {

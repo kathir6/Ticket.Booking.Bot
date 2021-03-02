@@ -1,4 +1,4 @@
-#include <arpa/inet.h>
+#include <arpa/inet.h>       /*  */
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
@@ -15,9 +15,12 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-#include <vector>
-#include <map>
-#include <ctime> /* for tomorrow date calculation */ 
+#include <stdlib.h>
+#include <error.h>
+#include <errno.h>           /* errno       - for  */
+#include <vector>            /* STL vector  - for storing database */
+#include <map>               /* STL Map     - for storing ticket details */
+#include <ctime>             /*             - for tomorrow date calculation */ 
 
 using namespace std;
 
@@ -25,7 +28,8 @@ void *server_client(void *);
 
 int list_movie_fun(char *check_msg);
 int show_check_fun(char *check_msg);
-
+int wel_fun(char *check_msg);
+string good_fun();
 struct arg {
   int connFD;
 };

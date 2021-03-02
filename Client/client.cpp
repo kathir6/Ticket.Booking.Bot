@@ -13,6 +13,8 @@
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <error.h>
+#include <errno.h>
 
 using namespace std;
 
