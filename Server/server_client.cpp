@@ -13,6 +13,8 @@ void *server_client(void *arg_thread) {
   /* recv_start_dummy_msg*/
   bzero(recv_msg, strlen(recv_msg));
   recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
+
+  /* Start of conversation */
   // while (1)
   {
     /* Welcome_Note */
@@ -21,13 +23,13 @@ void *server_client(void *arg_thread) {
            "Welcome to xxx ticket booking system\nHow can I help you???\n");
     sendS = send(connFD, (char *)&send_msg, sizeof(send_msg), 0);
     if (sendS == -1) {
-      cout << "      to client     : failed   --- " << strerror(errno) << "\n";
+      cout << "     to client      : failed   --- " << strerror(errno) << "\n";
       exit(0);
     } else {
-      cout << "      to client     : success\n";
+      cout << "     to client      : success\n";
     }
 
-    /*list*/
+    /* list of movies | day | time */
     movie_vect.push_back("uppena");
     movie_vect.push_back("master");
     movie_vect.push_back("black widow");
@@ -44,15 +46,13 @@ void *server_client(void *arg_thread) {
     memset(&movie_ticket, 0, sizeof(movie_ticket));
     bzero(recv_msg, sizeof(recv_msg));
     recvS = recv(connFD, (char *)&recv_msg, sizeof(recv_msg), 0);
-    cout << "      from client   : " << recv_msg << "\n";
+    cout << "    from client     : " << recv_msg << "\n";
     if (strcmp(recv_msg, "bye") == 0) {
       goto connect_end;
     }
 
-    /*check for string content*/
-
   check_recv_msg_end:
-
+    /*check for string content*/
     list_movie_flag = list_movie_fun(recv_msg);
     show_check_flag = show_check_fun(recv_msg);
     movie_flag = day_flag = show_flag = 0;
@@ -61,6 +61,7 @@ void *server_client(void *arg_thread) {
     for (int i = 0; i < sizeof(recv_msg); ++i) {
       recv_msg[i] = tolower(recv_msg[i]);
     }
+    /* check for movie */
     for (int i = 0; i < movie_vect.size(); i++) {
       if (strstr(recv_msg, ((movie_vect[i]).c_str()))) {
         movie_flag = 1;
@@ -69,18 +70,19 @@ void *server_client(void *arg_thread) {
         break;
       }
     }
-    // for(int i=0; i < day_vect.size(); ++i)
+    /* check for day */
     {
       if (strstr(recv_msg, ((day_vect[1]).c_str())) || (next_2_day == 2)) {
         day_flag = 1;
         strcpy(df, (day_vect[1]).c_str());
-        cout << "      day found     : success\n";
+        cout << "     day found      : success\n";
       } else if (strstr(recv_msg, ((day_vect[0]).c_str())) || (next_2_day == 1)) {
         day_flag = 1;
         strcpy(df, (day_vect[0]).c_str());
-        cout << "      day found     : success\n";
+        cout << "     day found      : success\n";
       }
     }
+    /* check for show */
     for (int i = 0; i < show_vect.size(); ++i) {
       if (strstr(recv_msg, ((show_vect[i]).c_str())) && (!strstr(recv_msg, "good"))) {
         show_flag = 1;
@@ -96,16 +98,13 @@ void *server_client(void *arg_thread) {
     /* movie_found_flag && !(day_found_flag) && !(time_found_flag) */
     bzero(send_msg, strlen(send_msg));
     if ((movie_flag) && (!day_flag) && (!show_flag)) {
-      strcpy(send_msg, "Choose one timings from the list below\n\n");
   // map
   highest_slot = 8;
       for(show_slot_dis = 1; show_slot_dis < 9; ++show_slot_dis)
       {
-        strcpy(movie_ticket.movie_name, mf); // map
+        strcpy(movie_ticket.movie_name, mf); 
         if(show_slot_dis <= 4)
-        {
-          strcpy(movie_ticket.date, tomorrow().c_str()); // map
-        }
+          strcpy(movie_ticket.date, tomorrow().c_str()); 
         else if (show_slot_dis > 4)
                 strcpy(movie_ticket.date, day_after_tomorrow().c_str());
           if(show_slot_dis%4 == 1)
@@ -119,17 +118,18 @@ void *server_client(void *arg_thread) {
         
         dis_timings.insert(pair<int, ticket_detail>(show_slot_dis, movie_ticket));
       }
-      
-      strcat(send_msg, "\t     Movie Name    - ");
+/* Display */
+      strcpy(send_msg, "Choose one timings from the list below\n\n");
+      strcat(send_msg, "\tMovie Name    - ");
       strcat(send_msg, mf);
-      strcat(send_msg, "\n       Timing       \n               ");
+      strcat(send_msg, "\n       Timing       \n          ");
       strcat(send_msg, "       01              02              03              "
                        "04        \n");
 
       strcat(send_msg, tomorrow().c_str());
       strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        "
                        "09:00 PM     \n");
-      strcat(send_msg, "               ");
+      strcat(send_msg, "          ");
       strcat(send_msg, "       05              06              07              "
                        "08        \n");
       strcat(send_msg, day_after_tomorrow().c_str());
@@ -142,26 +142,20 @@ void *server_client(void *arg_thread) {
     /* only date found */
     /* (!movie_found_flag) && (day_found_flag) && !(time_found_flag) */
     else if ((!movie_flag) && (day_flag) && (!show_flag)) {
-      strcpy(send_msg, "Choose one timings from the list below\n");
-      cout << "map start\n";
-      
+      //map
       highest_slot = movie_vect.size() * 4;
-      // map
       int q=0;
       for(show_slot_dis = 1; show_slot_dis <= (movie_vect.size() * 4); ++show_slot_dis)
       {
-        cout << show_slot_dis << "\n";
-        //for(; q < movie_vect.size(); q = (show_slot_dis-1)/4 )
         q = (show_slot_dis-1)/4;
-        {strcpy(movie_ticket.movie_name, (movie_vect[q]).c_str());
-        cout << q << "\n";
-        } // map
+      strcpy(movie_ticket.movie_name, (movie_vect[q]).c_str());
+        
 
-        if (strcmp(df, "tomorrow") == 0) {
+        if (strcmp(df, "tomorrow") == 0) 
                 strcpy(movie_ticket.date, tomorrow().c_str());
-        } else if (strcmp(df, "day after tomorrow") == 0) {
+         else if (strcmp(df, "day after tomorrow") == 0) 
           strcpy(movie_ticket.date, day_after_tomorrow().c_str());
-        }
+        
 
           if(show_slot_dis%4 == 1)
           strcpy(movie_ticket.show, "09:00 AM");
@@ -175,8 +169,10 @@ void *server_client(void *arg_thread) {
         dis_timings.insert(pair<int, ticket_detail>(show_slot_dis, movie_ticket));
         
       }
-
+    /* Display */
       int show_slot = 01;
+            strcpy(send_msg, "Choose one timings from the list below\n");
+
       strcat(send_msg, "-------------------------------------------------------"
                        "--------------------------\n");
       for (int j = 0; j < movie_vect.size(); ++j) {

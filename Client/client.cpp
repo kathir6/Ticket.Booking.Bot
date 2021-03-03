@@ -1,5 +1,7 @@
 #include <arpa/inet.h>
 #include <cstring>
+#include <errno.h>
+#include <error.h>
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
@@ -13,8 +15,6 @@
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <error.h>
-#include <errno.h>
 
 using namespace std;
 
@@ -23,10 +23,10 @@ int main(int argc, char *argv[]) {
     cerr << "\tUsage: ip_address port" << endl;
     exit(0);
   }
-  char *serverIp = argv[1];
+  char *serverIP = argv[1];
   int port = atoi(argv[2]), closeS, recvS, sendS;
   char send_msg[1500], recv_msg[1500];
-  struct hostent *host = gethostbyname(serverIp);
+  struct hostent *host = gethostbyname(serverIP);
 
   sockaddr_in sendSockAddr;
 
@@ -59,7 +59,8 @@ int main(int argc, char *argv[]) {
     } else {
       cout << recv_msg << "\n";
     }
-    cout << "                                                            --> ";
+    cout << "                                                                  "
+            "    --> ";
     bzero(send_msg, strlen(send_msg));
     cin.getline(send_msg, 1000);
   }
