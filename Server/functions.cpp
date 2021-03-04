@@ -56,13 +56,15 @@ int wel_fun(char *check_msg)
     if( strstr(check_msg, (welcome_note_vect[i]).c_str()) )
     {
       cout << " welcome flag set\n";
-      return 1;
+      temp_flag = 1;
+      break;
     }
     else 
     {
       temp_flag = 0;
     }
   }
+  return temp_flag;
 }
 
 string good_fun()
@@ -84,6 +86,10 @@ string good_fun()
   else if ( ( 17 <= cs_time->tm_hour ) && ( cs_time->tm_hour <= 21 ) )
   {
     return "Good Evening";
+  }
+  else
+  {
+    return "";
   }
 }
 

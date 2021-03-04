@@ -120,17 +120,17 @@ void *server_client(void *arg_thread) {
       }
 /* Display */
       strcpy(send_msg, "Choose one timings from the list below\n\n");
-      strcat(send_msg, "\tMovie Name    - ");
+      strcat(send_msg, "\tMovie Name - ");
       strcat(send_msg, mf);
       strcat(send_msg, "\n       Timing       \n          ");
-      strcat(send_msg, "       01              02              03              "
+      strcat(send_msg, "           01              02              03              "
                        "04        \n");
 
       strcat(send_msg, tomorrow().c_str());
       strcat(send_msg, "    09:00 AM        01:00 PM        05:00 PM        "
                        "09:00 PM     \n");
       strcat(send_msg, "          ");
-      strcat(send_msg, "       05              06              07              "
+      strcat(send_msg, "           05              06              07              "
                        "08        \n");
       strcat(send_msg, day_after_tomorrow().c_str());
       strcat(
@@ -178,7 +178,7 @@ void *server_client(void *arg_thread) {
       for (int j = 0; j < movie_vect.size(); ++j) {
         strcat(send_msg, "     Movie Name    - ");
         strcat(send_msg, (movie_vect[j]).c_str());
-        strcat(send_msg, "\n       Timing       \n                           ");
+        strcat(send_msg, "\n       Timing       \n                      ");
         for (int k = 0; k < 4; k++) {
           sprintf(tp, "%.2d", show_slot);
           show_slot++;
@@ -248,9 +248,9 @@ void *server_client(void *arg_thread) {
       for (int j = 0; j < movie_vect.size(); ++j) {
         strcat(send_msg, "-----------------------------------------------------"
                          "----------------------------\n");
-        strcat(send_msg, "\n     Movie Name    - ");
+        strcat(send_msg, "     Movie Name    - ");
         strcat(send_msg, (movie_vect[j]).c_str());
-        strcat(send_msg, "\n       Timing       \n                           ");
+        strcat(send_msg, "\n       Timing       \n                      ");
         sprintf(tp, "%.2d", show_slot);
         show_slot++;
         strcat(send_msg, tp);
@@ -264,7 +264,7 @@ void *server_client(void *arg_thread) {
         } else if (strcmp(sf, "night") == 0 || show_check_flag == 4) {
           strcat(send_msg, "    09:00 PM\n");
         }
-        strcat(send_msg, "                           ");
+        strcat(send_msg, "                      ");
         sprintf(tp, "%.2d", show_slot);
         show_slot++;
         strcat(send_msg, tp);

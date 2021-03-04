@@ -1,6 +1,5 @@
 #include "server_client.h"
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 vector<pthread_t> thread_vect;
 
 int main(int argc, char *argv[]) {
