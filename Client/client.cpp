@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   }
   char *serverIP = argv[1];
   int port = atoi(argv[2]), closeS, recvS, sendS;
-  char send_msg[1500], recv_msg[1500];
+  char send_msg[2500], recv_msg[2500];
   struct hostent *host = gethostbyname(serverIP);
 
   sockaddr_in sendSockAddr;

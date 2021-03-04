@@ -4,7 +4,7 @@ void *server_client(void *arg_thread) {
   struct arg *args_thread = (struct arg *)arg_thread;
   int connFD = args_thread->connFD, sendS, recvS, closeS, showslot,
       ticket_count, ticket_price, movie_flag = 0, day_flag = 0, show_flag = 0, wel_flag = 0, list_movie_flag = 0, show_check_flag = 0, movie_check_flag = 0, next_2_day = 0, show_slot_dis, highest_slot;
-  char send_msg[1500], recv_msg[1500], tp[100], mf[100], df[100], sf[100], temp[100];
+  char send_msg[2500], recv_msg[2500], tp[100], mf[100], df[100], sf[100], temp[100];
   char *words;
   struct ticket_detail movie_ticket;
   vector<string> movie_vect, day_vect, show_vect;
@@ -34,6 +34,9 @@ void *server_client(void *arg_thread) {
     movie_vect.push_back("master");
     movie_vect.push_back("black widow");
     movie_vect.push_back("the batman");
+    movie_vect.push_back("karnan");
+    movie_vect.push_back("sulthan");
+    movie_vect.push_back("doctor");
     day_vect.push_back("tomorrow");
     day_vect.push_back("day after tomorrow");
     show_vect.push_back("morning");
@@ -735,6 +738,7 @@ listen_show_slot:
         strcat(send_msg, "\nTicket Price : ");
         sprintf(tp, "%d", ticket_price);
         strcat(send_msg, tp);
+        strcat(send_msg, "\n****************************");
         strcat(send_msg, "\n\nPlease confirm to book tickets (yes/no) . . . ");
       } else {
         bzero(send_msg, strlen(send_msg));

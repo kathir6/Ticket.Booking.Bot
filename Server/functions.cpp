@@ -52,10 +52,8 @@ int wel_fun(char *check_msg)
   welcome_note_vect.push_back("hey");
   for(int i=0; i<welcome_note_vect.size(); i++)
   {
-    cout << welcome_note_vect[i] << "\n";
     if( strstr(check_msg, (welcome_note_vect[i]).c_str()) )
     {
-      cout << " welcome flag set\n";
       temp_flag = 1;
       break;
     }
