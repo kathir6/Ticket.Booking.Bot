@@ -56,14 +56,15 @@ void *server_client(void *arg_thread) {
 
   check_recv_msg_end:
     /*check for string content*/
+    for (int i = 0; i < sizeof(recv_msg); ++i) {
+      recv_msg[i] = tolower(recv_msg[i]);
+    }
     list_movie_flag = list_movie_fun(recv_msg);
     show_check_flag = show_check_fun(recv_msg);
     movie_flag = day_flag = show_flag = 0;
     next_2_day = get_next_two_day(recv_msg);
     wel_flag = wel_fun(recv_msg);
-    for (int i = 0; i < sizeof(recv_msg); ++i) {
-      recv_msg[i] = tolower(recv_msg[i]);
-    }
+    
     /* check for movie */
     for (int i = 0; i < movie_vect.size(); i++) {
       if (strstr(recv_msg, ((movie_vect[i]).c_str()))) {
