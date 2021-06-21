@@ -7,4 +7,3 @@ build: ${SRC}
 	g++ ${SRC} -o client.out
 	echo "Running ..."
 	./client.out 127.0.0.1 8001
-	rm -rf client.out
