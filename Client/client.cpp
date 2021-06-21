@@ -32,13 +32,11 @@ int main(int argc, char *argv[]) {
 
   bzero((char *)&sendSockAddr, sizeof(sendSockAddr));
   sendSockAddr.sin_family = AF_INET;
-  sendSockAddr.sin_addr.s_addr =
-      inet_addr(inet_ntoa(*(struct in_addr *)*host->h_addr_list));
+  sendSockAddr.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr *)*host->h_addr_list));
   sendSockAddr.sin_port = htons(port);
 
   int clientFD = socket(AF_INET, SOCK_STREAM, 0);
-  int connectS =
-      connect(clientFD, (sockaddr *)&sendSockAddr, sizeof(sendSockAddr));
+  int connectS = connect(clientFD, (sockaddr *)&sendSockAddr, sizeof(sendSockAddr));
   if (connectS == -1) {
     cout << "\n     connection     : failed  --- " << strerror(errno) << "\n";
     exit(0);
@@ -59,8 +57,7 @@ int main(int argc, char *argv[]) {
     } else {
       cout << recv_msg << "\n";
     }
-    cout << "                                                                  "
-            "    --> ";
+    cout << "                                                                        --> ";
     bzero(send_msg, strlen(send_msg));
     cin.getline(send_msg, 1000);
   }
